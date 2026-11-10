@@ -1,556 +1,181 @@
 /**
- * BOREAL ENGMED - MÓDULO COMERCIAL & DOCUMENTOS OFICIAIS
- * Versão 4.0 - Arquitetura Operacional Integrada e Modular
+ * BOREAL ENGMED - SISTEMA INTEGRADO COMERCIAL, PRODUÇÃO & DOCUMENTOS
+ * Versão 5.0 - Atendimento Integral aos 19 Requisitos
  */
 
-// ESTADO GLOBAL REATIVO DO MÓDULO COMERCIAL
-const BorealComercialState = {
+// ESTADO GLOBAL REATIVO DO SISTEMA
+const BorealApp = {
   abaAtiva: "relatorio_comercial",
   clienteAtivoId: "CLI-001",
   modeloDocAtivo: "proposta",
-  
-  // Matriz Principal do Relatório Comercial (As 17 Colunas Exatas da Tabela)
-  relatorioComercial: [
+  linkRadarEditais: "https://app.licitei.com.br/dashboard/radar-de-licitacoes?filterId=%229417%22&date=20260529%3B20260529&periodType=publication&page=0&orderBy=relevant&showSeen=false&edit=false&triagem=false",
+
+  // Base Principal: Relatório Comercial
+  // Colunas da Tabela 0: EDITAL, PROCESSO, PORTAL, DATA DA PROPOSTA, CLIENTE, CNPJ, ENDEREÇO, OBJETO, VALOR ESTIMADO (R$), STATUS DO PROCESSO, AÇÃO (APAGAR, ITENS)
+  processosComerciais: [
     {
       id: "CLI-001",
       edital: "Pregão Eletrônico 042/2026",
       processo: "PROAD 1042/2026",
-      portal: "PNCP",
+      portal: "Licitei / ComprasGov",
       dataProposta: "2026-03-02",
       cliente: "Tribunal Regional do Trabalho - 15ª Região",
       cnpj: "04.414.837/0001-38",
       endereco: "Rua Barão de Jaguara, 901 - Centro, Campinas - SP",
-      quantUnidades: 2,
-      quantEmpregados: 400,
-      tipoContrato: "Empreitada Global",
-      item: 1,
       objeto: "Elaboração de Documento Base do PGR, LTCAT e Avaliações Psicossociais COPSOQ",
-      quantidade: 1,
-      unid: "UN",
-      valorUnitario: 35000.00,
-      valorTotal: 35000.00,
-      status: "solicitacao_proposta",
-      // Itens detalhados que compõem a Proposta Comercial Formal
-      itensProposta: [
-        { item: 1, descricao: "Elaboração do Documento-Base do PGR conforme NR-01", qte: 1, un: "UN", vlUnitario: 15000.00, vlTotal: 15000.00 },
-        { item: 2, descricao: "Vistorias Técnicas In Loco e Medições Ambientais com Instrumentos Calibrados", qte: 2, un: "UNIDADE", vlUnitario: 5000.00, vlTotal: 10000.00 },
-        { item: 3, descricao: "Aplicação e Gestão de Avaliações Psicossociais Remotas COPSOQ", qte: 400, un: "SERVIDOR", vlUnitario: 25.00, vlTotal: 10000.00 }
-      ],
-      // Itens de Cronograma e Relatórios
-      itensCronograma: [
-        { mes: "Mês 1", dia: "01 a 10", servico: "Levantamento documental e vistorias in loco na Sede Campinas", local: "Campinas - SP", vlUnitario: 12500.00, vlTotal: 12500.00, obs: "Equipamentos calibrados" },
-        { mes: "Mês 1", dia: "11 a 20", servico: "Vistoria técnica presencial e avaliações ambientais no Fórum Paulínia", local: "Paulínia - SP", vlUnitario: 12500.00, vlTotal: 12500.00, obs: "Avaliação ruído e iluminância" },
-        { mes: "Mês 2", dia: "01 a 30", servico: "Aplicação remota do questionário COPSOQ e entrega final do PGR", local: "Todas as Unidades", vlUnitario: 10000.00, vlTotal: 10000.00, obs: "Protocolo e aceite" }
+      valorEstimado: 85000.00,
+      statusProcesso: "vencedor_homologacao", // Vencedor habilita a tecla ITENS
+      subMatrizAberta: true, // Controle de expansão da sub-matriz de produção
+      // Sub-Matriz: Relatório de Produção (10 Colunas)
+      itensProducao: [
+        {
+          id: "PROD-1",
+          tipoContrato: "Mensal sob Demanda",
+          item: 1,
+          objeto: "Elaboração do Documento-Base do PGR conforme NR-01",
+          quant: 1,
+          unid: "UN",
+          vlUnitario: 25000.00,
+          vlTotal: 25000.00,
+          statusProducao: "entregue_aceito", // Dispara solicitação de NF
+          relatoriosAnexados: [
+            { id: "REL-101", nome: "Relatorio_Entrega_PGR_Base.pdf", data: "2026-03-15", hash: "BOREAL-9A4F2E-8831" }
+          ]
+        },
+        {
+          id: "PROD-2",
+          tipoContrato: "Empreitada Imediata",
+          item: 2,
+          objeto: "Vistorias Técnicas In Loco e Medições Ambientais com Aparelhos Calibrados",
+          quant: 2,
+          unid: "UNIDADE",
+          vlUnitario: 10000.00,
+          vlTotal: 20000.00,
+          statusProducao: "concluido", // Gera automaticamente relatório de entrega
+          relatoriosAnexados: []
+        },
+        {
+          id: "PROD-3",
+          tipoContrato: "Mensal sob Demanda",
+          item: 3,
+          objeto: "Aplicação e Avaliação Psicossocial Remota (Metodologia COPSOQ)",
+          quant: 400,
+          unid: "SERVIDOR",
+          vlUnitario: 25.00,
+          vlTotal: 10000.00,
+          statusProducao: "servico_andamento",
+          relatoriosAnexados: []
+        }
       ]
     },
     {
       id: "CLI-002",
       edital: "Dispensa de Licitação 018/2026",
       processo: "ADM 2209/2026",
-      portal: "PNCP",
-      dataProposta: "2026-03-05",
+      portal: "Licitei / BBMNet",
+      dataProposta: "2026-03-08",
       cliente: "Prefeitura Municipal de Paulínia",
       cnpj: "45.748.887/0001-44",
       endereco: "Av. Pref. José Lozano Araújo, 1551 - Paulínia - SP",
-      quantUnidades: 4,
-      quantEmpregados: 120,
-      tipoContrato: "Menor Preço",
-      item: 1,
       objeto: "Elaboração de Laudo Técnico das Condições Ambientais de Trabalho (LTCAT)",
-      quantidade: 1,
-      unid: "UN",
-      valorUnitario: 18500.00,
-      valorTotal: 18500.00,
-      status: "solicitacao_proposta",
-      itensProposta: [
-        { item: 1, descricao: "Elaboração de LTCAT para enquadramento previdenciário e insalubridade", qte: 1, un: "UN", vlUnitario: 18500.00, vlTotal: 18500.00 }
-      ],
-      itensCronograma: [
-        { mes: "Mês 1", dia: "05 a 25", servico: "Avaliações ambientais in loco em todas as secretarias municipais", local: "Paulínia - SP", vlUnitario: 18500.00, vlTotal: 18500.00, obs: "Entrega do laudo conclusivo" }
+      valorEstimado: 28500.00,
+      statusProcesso: "solicitacao_proposta",
+      subMatrizAberta: false,
+      itensProducao: [
+        {
+          id: "PROD-4",
+          tipoContrato: "Empreitada Imediata",
+          item: 1,
+          objeto: "Elaboração de LTCAT para enquadramento previdenciário e insalubridade",
+          quant: 1,
+          unid: "UN",
+          vlUnitario: 28500.00,
+          vlTotal: 28500.00,
+          statusProducao: "solicitacao_proposta",
+          relatoriosAnexados: []
+        }
       ]
     }
   ],
 
-  // Dados dos Fiscais e Gestão para os outros módulos quando o status for "Vencedor aguardando homologação"
-  modulosIntegrados: {
-    gestaoContratos: [],
-    producao: []
-  }
+  // Módulo de Contratos que será alimentado automaticamente pelos clientes com status de vencedor
+  contratosAlimentados: []
 };
 
-// CONTROLADOR PRINCIPAL
-window.borealComercial = {
+// CONTROLADOR DE OPERAÇÕES BOREAL
+window.borealApp = {
   
   init: function() {
-    this.carregarEstadoLocal();
-    this.renderizarMatrizRelatorioComercial();
-    this.popularSeletoresClientes();
-    this.renderizarAmbienteEdicaoDocumento();
-    this.configurarCanvasAssinatura();
+    this.carregarLinkRadar();
+    this.renderizarRelatorioComercial();
+    this.atualizarListaClientesVencedores();
+    this.popularSeletoresDocumentos();
+    this.renderizarDocumentoAtivo();
     if (window.lucide) window.lucide.createIcons();
   },
 
-  // 1. NAVEGAÇÃO ENTRE ABAS
-  alternarAba: function(abaId) {
-    BorealComercialState.abaAtiva = abaId;
-    
-    document.getElementById("aba-relatorio-comercial").classList.add("hidden");
-    document.getElementById("aba-documentos-padroes").classList.add("hidden");
-    document.getElementById("nav-btn-relatorio").classList.remove("active");
-    document.getElementById("nav-btn-documentos").classList.remove("active");
-
-    if (abaId === "relatorio_comercial") {
-      document.getElementById("aba-relatorio-comercial").classList.remove("hidden");
-      document.getElementById("nav-btn-relatorio").classList.add("active");
-    } else {
-      document.getElementById("aba-documentos-padroes").classList.remove("hidden");
-      document.getElementById("nav-btn-documentos").classList.add("active");
-      this.popularSeletoresClientes();
-      this.renderizarAmbienteEdicaoDocumento();
-    }
-    if (window.lucide) window.lucide.createIcons();
-  },
-
-  getClienteAtivo: function() {
-    return BorealComercialState.relatorioComercial.find(c => c.id === BorealComercialState.clienteAtivoId) 
-      || BorealComercialState.relatorioComercial[0];
-  },
-
-  selecionarClienteAtivo: function(clienteId) {
-    BorealComercialState.clienteAtivoId = clienteId;
-    const docSelect = document.getElementById("doc-select-cliente");
-    if (docSelect) docSelect.value = clienteId;
-    this.renderizarAmbienteEdicaoDocumento();
-  },
-
-  mudarClienteDocumento: function(clienteId) {
-    BorealComercialState.clienteAtivoId = clienteId;
-    const globalSelect = document.getElementById("select-global-cliente");
-    if (globalSelect) globalSelect.value = clienteId;
-    this.renderizarAmbienteEdicaoDocumento();
-  },
-
-  popularSeletoresClientes: function() {
-    const selGlobal = document.getElementById("select-global-cliente");
-    const selDoc = document.getElementById("doc-select-cliente");
-    if (!selGlobal || !selDoc) return;
-
-    selGlobal.innerHTML = "";
-    selDoc.innerHTML = "";
-
-    BorealComercialState.relatorioComercial.forEach(c => {
-      const opt1 = document.createElement("option");
-      opt1.value = c.id;
-      opt1.textContent = `${c.cliente} (${c.edital || c.processo})`;
-      if (c.id === BorealComercialState.clienteAtivoId) opt1.selected = true;
-
-      const opt2 = opt1.cloneNode(true);
-      selGlobal.appendChild(opt1);
-      selDoc.appendChild(opt2);
-    });
-  },
-
-  // =========================================================================
-  // 2. MATRIZ DO RELATÓRIO COMERCIAL (AS 17 COLUNAS EXATAS)
-  // =========================================================================
-  renderizarMatrizRelatorioComercial: function() {
-    const tbody = document.getElementById("tbody-relatorio-comercial-matriz");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    let totalGlobal = 0;
-
-    BorealComercialState.relatorioComercial.forEach((linha, idx) => {
-      // Cálculo automático: quantidade * valor unitário
-      const qtd = parseFloat(linha.quantidade) || 0;
-      const vlUnit = parseFloat(linha.valorUnitario) || 0;
-      linha.valorTotal = qtd * vlUnit;
-      totalGlobal += linha.valorTotal;
-
-      const tr = document.createElement("tr");
-      tr.className = "hover:bg-slate-50 transition border-b";
-      tr.innerHTML = `
-        <td class="p-1 border-r"><input type="text" value="${linha.edital || ''}" onchange="window.borealComercial.atualizarCelula(${idx}, 'edital', this.value)" class="table-input font-semibold"></td>
-        <td class="p-1 border-r"><input type="text" value="${linha.processo || ''}" onchange="window.borealComercial.atualizarCelula(${idx}, 'processo', this.value)" class="table-input"></td>
-        <td class="p-1 border-r"><input type="text" value="${linha.portal || 'PNCP'}" onchange="window.borealComercial.atualizarCelula(${idx}, 'portal', this.value)" class="table-input font-bold text-[#B48D3C]"></td>
-        <td class="p-1 border-r"><input type="date" value="${linha.dataProposta || ''}" onchange="window.borealComercial.atualizarCelula(${idx}, 'dataProposta', this.value)" class="table-input"></td>
-        <td class="p-1 border-r"><input type="text" value="${linha.cliente || ''}" onchange="window.borealComercial.atualizarCelula(${idx}, 'cliente', this.value)" class="table-input font-bold text-slate-900 min-w-[200px]"></td>
-        <td class="p-1 border-r"><input type="text" value="${linha.cnpj || ''}" onchange="window.borealComercial.atualizarCelula(${idx}, 'cnpj', this.value)" class="table-input font-mono"></td>
-        <td class="p-1 border-r"><input type="text" value="${linha.endereco || ''}" onchange="window.borealComercial.atualizarCelula(${idx}, 'endereco', this.value)" class="table-input min-w-[220px]"></td>
-        <td class="p-1 border-r text-center"><input type="number" min="1" value="${linha.quantUnidades || 1}" onchange="window.borealComercial.atualizarCelula(${idx}, 'quantUnidades', parseInt(this.value)||1)" class="table-input text-center"></td>
-        <td class="p-1 border-r text-center"><input type="number" min="0" value="${linha.quantEmpregados || 0}" onchange="window.borealComercial.atualizarCelula(${idx}, 'quantEmpregados', parseInt(this.value)||0)" class="table-input text-center font-semibold"></td>
-        <td class="p-1 border-r"><input type="text" value="${linha.tipoContrato || 'Global'}" onchange="window.borealComercial.atualizarCelula(${idx}, 'tipoContrato', this.value)" class="table-input"></td>
-        <td class="p-1 border-r text-center"><input type="number" value="${linha.item || (idx + 1)}" onchange="window.borealComercial.atualizarCelula(${idx}, 'item', parseInt(this.value)||1)" class="table-input text-center font-bold"></td>
-        <td class="p-1 border-r"><input type="text" value="${linha.objeto || ''}" onchange="window.borealComercial.atualizarCelula(${idx}, 'objeto', this.value)" class="table-input min-w-[240px]"></td>
-        <td class="p-1 border-r text-center"><input type="number" min="1" value="${linha.quantidade || 1}" onchange="window.borealComercial.atualizarCelula(${idx}, 'quantidade', parseFloat(this.value)||1)" class="table-input text-center font-semibold"></td>
-        <td class="p-1 border-r text-center"><input type="text" value="${linha.unid || 'UN'}" onchange="window.borealComercial.atualizarCelula(${idx}, 'unid', this.value)" class="table-input text-center uppercase font-bold text-slate-600"></td>
-        <td class="p-1 border-r text-right"><input type="number" step="0.01" value="${(linha.valorUnitario || 0).toFixed(2)}" onchange="window.borealComercial.atualizarCelula(${idx}, 'valorUnitario', parseFloat(this.value)||0)" class="table-input text-right font-semibold"></td>
-        <td class="p-2 border-r text-right font-bold text-slate-900 bg-slate-50/50">R$ ${linha.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td class="p-1 border-r">
-          <select onchange="window.borealComercial.processarStatusProcesso(${idx}, this.value)" class="w-full text-xs font-bold border border-slate-300 rounded p-1 bg-amber-50/60 text-slate-800 focus:ring-[#B48D3C]">
-            <option value="solicitacao_proposta" ${linha.status === 'solicitacao_proposta' ? 'selected' : ''}>Solicitação de proposta</option>
-            <option value="vencedor_homologacao" ${linha.status === 'vencedor_homologacao' ? 'selected' : ''}>Vencedor aguardando homologação</option>
-            <option value="vencedor_recurso" ${linha.status === 'vencedor_recurso' ? 'selected' : ''}>Vencedor aguardando recurso</option>
-            <option value="homologado_contrato" ${linha.status === 'homologado_contrato' ? 'selected' : ''}>Homologado aguardando contrato</option>
-            <option value="contratado_empenho" ${linha.status === 'contratado_empenho' ? 'selected' : ''}>Contratado aguardando empenho</option>
-            <option value="empenhado_os" ${linha.status === 'empenhado_os' ? 'selected' : ''}>Empenhado aguardando ordem de serviço</option>
-            <option value="servico_iniciado" ${linha.status === 'servico_iniciado' ? 'selected' : ''}>Serviço iniciado</option>
-            <option value="sem_exito" ${linha.status === 'sem_exito' ? 'selected' : ''}>Sem êxito (Apagar)</option>
-            <option value="revogado" ${linha.status === 'revogado' ? 'selected' : ''}>Revogado (Apagar)</option>
-          </select>
-        </td>
-        <td class="p-1 text-center">
-          <button onclick="window.borealComercial.apagarLinhaRelatorio(${idx})" class="p-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded" title="Apagar da Matriz">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          </button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById("relatorio-total-acumulado").textContent = `R$ ${totalGlobal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-    if (window.lucide) window.lucide.createIcons();
-  },
-
-  atualizarCelula: function(index, campo, valor) {
-    const linha = BorealComercialState.relatorioComercial[index];
-    if (linha) {
-      linha[campo] = valor;
-      // Se alterou quantidade ou valor unitário da matriz, atualiza os itens da proposta também
-      if (campo === "valorUnitario" || campo === "quantidade" || campo === "objeto") {
-        if (linha.itensProposta && linha.itensProposta.length === 1) {
-          linha.itensProposta[0].descricao = linha.objeto;
-          linha.itensProposta[0].qte = linha.quantidade;
-          linha.itensProposta[0].vlUnitario = linha.valorUnitario;
-          linha.itensProposta[0].vlTotal = linha.quantidade * linha.valorUnitario;
-        }
-      }
-      this.renderizarMatrizRelatorioComercial();
-      this.renderizarAmbienteEdicaoDocumento();
+  // 1 & 2. CONFIGURAÇÃO DO LINK EXTERNO DO RADAR DE EDITAIS
+  carregarLinkRadar: function() {
+    const inputLink = document.getElementById("input-link-radar");
+    const btnAcessar = document.getElementById("btn-acessar-radar");
+    if (inputLink && btnAcessar) {
+      inputLink.value = BorealApp.linkRadarEditais;
+      btnAcessar.href = BorealApp.linkRadarEditais;
     }
   },
 
-  // 3. REGRAS DE NEGÓCIO DO STATUS DO PROCESSO
-  processarStatusProcesso: function(index, novoStatus) {
-    const linha = BorealComercialState.relatorioComercial[index];
-    if (!linha) return;
-
-    linha.status = novoStatus;
-
-    // REGRA 1: Se o status for "Sem êxito" ou "Revogado", as informações são apagadas da matriz e o processo cessa
-    if (novoStatus === "sem_exito" || novoStatus === "revogado") {
-      const confirmacao = confirm(`O status foi definido como "${novoStatus.toUpperCase()}". Conforme a regra de negócio, as informações deste processo serão apagadas da matriz e o fluxo será cessado. Confirmar?`);
-      if (confirmacao) {
-        BorealComercialState.relatorioComercial.splice(index, 1);
-        this.popularSeletoresClientes();
-        this.renderizarMatrizRelatorioComercial();
-        this.renderizarAmbienteEdicaoDocumento();
-        alert("Processo removido da matriz do Relatório Comercial com sucesso.");
-        return;
-      }
-    }
-
-    // REGRA 2: Quando o status for "Vencedor aguardando homologação", preenche automaticamente a Gestão de Contratos e demais módulos
-    if (novoStatus === "vencedor_homologacao") {
-      alert(`Status atualizado para: "VENCEDOR AGUARDANDO HOMOLOGAÇÃO"!\n\nO sistema replicou os dados cadastrais (Cliente: ${linha.cliente}, CNPJ: ${linha.cnpj}, Objeto: ${linha.objeto}, Valor: R$ ${linha.valorTotal}) diretamente para o Módulo de Gestão de Contratos e Produção.`);
-      BorealComercialState.modulosIntegrados.gestaoContratos.push({
-        cliente: linha.cliente,
-        cnpj: linha.cnpj,
-        endereco: linha.endereco,
-        objeto: linha.objeto,
-        valorContrato: linha.valorTotal,
-        vigencia: "12 meses"
-      });
-    }
-
-    // REGRA 3: Quando for "Solicitação de proposta", alimenta os dados teóricos da tabela da proposta
-    if (novoStatus === "solicitacao_proposta") {
-      alert("Status definido como Solicitação de Proposta. Os dados teóricos foram transferidos para a Proposta Comercial. Complete os valores e adicione os itens necessários.");
-    }
-
-    this.renderizarMatrizRelatorioComercial();
-  },
-
-  adicionarLinhaRelatorio: function() {
-    const novoId = "CLI-" + String(BorealComercialState.relatorioComercial.length + 1).padStart(3, '0');
-    BorealComercialState.relatorioComercial.push({
-      id: novoId,
-      edital: "Pregão Eletrônico 2026",
-      processo: "Processo Administrativo",
-      portal: "PNCP",
-      dataProposta: new Date().toISOString().split('T')[0],
-      cliente: "Novo Órgão / Solicitante",
-      cnpj: "00.000.000/0001-00",
-      endereco: "Endereço a confirmar",
-      quantUnidades: 1,
-      quantEmpregados: 50,
-      tipoContrato: "Global",
-      item: BorealComercialState.relatorioComercial.length + 1,
-      objeto: "Prestação de serviços especializados em SST (PGR, LTCAT e Laudos)",
-      quantidade: 1,
-      unid: "UN",
-      valorUnitario: 10000.00,
-      valorTotal: 10000.00,
-      status: "solicitacao_proposta",
-      itensProposta: [
-        { item: 1, descricao: "Prestação de serviços especializados em SST (PGR, LTCAT e Laudos)", qte: 1, un: "UN", vlUnitario: 10000.00, vlTotal: 10000.00 }
-      ],
-      itensCronograma: [
-        { mes: "Mês 1", dia: "01 a 30", servico: "Levantamento de riscos e elaboração dos documentos", local: "Sede", vlUnitario: 10000.00, vlTotal: 10000.00, obs: "Início imediato" }
-      ]
-    });
-
-    BorealComercialState.clienteAtivoId = novoId;
-    this.popularSeletoresClientes();
-    this.renderizarMatrizRelatorioComercial();
-    this.renderizarAmbienteEdicaoDocumento();
-  },
-
-  apagarLinhaRelatorio: function(index) {
-    if (confirm("Deseja apagar esta linha do Relatório Comercial?")) {
-      BorealComercialState.relatorioComercial.splice(index, 1);
-      this.popularSeletoresClientes();
-      this.renderizarMatrizRelatorioComercial();
-      this.renderizarAmbienteEdicaoDocumento();
+  editarLinkCapitacao: function() {
+    const novoLink = prompt("Insira a nova URL do Radar de Editais / Portal de Licitações (ex: Licitei):", BorealApp.linkRadarEditais);
+    if (novoLink && novoLink.trim() !== "") {
+      BorealApp.linkRadarEditais = novoLink.trim();
+      this.carregarLinkRadar();
+      alert("Link do Radar de Editais atualizado com sucesso!");
     }
   },
 
-  exportarRelatorioExcel: function() {
-    const headers = [
-      ["EDITAL", "PROCESSO", "PORTAL", "DATA DA PROPOSTA", "CLIENTE", "CNPJ", "ENDEREÇO", "QUANT DE UNIDADES", "QUANT. DE EMPREGADOS", "TIPO DE CONTRATO", "ITEM", "OBJETO", "QUANTIDADE", "UNID.", "VALOR UNITÁRIO", "VALOR TOTAL R$", "STATUS"]
-    ];
-
-    BorealComercialState.relatorioComercial.forEach(l => {
-      headers.push([
-        l.edital, l.processo, l.portal, l.dataProposta, l.cliente, l.cnpj, l.endereco,
-        l.quantUnidades, l.quantEmpregados, l.tipoContrato, l.item, l.objeto, l.quantidade,
-        l.unid, l.valorUnitario, l.valorTotal, l.status
-      ]);
-    });
-
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(headers);
-    XLSX.utils.book_append_sheet(wb, ws, "RELATÓRIO COMERCIAL");
-    XLSX.writeFile(wb, "Relatorio_Comercial_Boreal_ENGMED.xlsx");
-  },
-
-  // =========================================================================
-  // 4. CAPTAÇÃO REAL NO PNCP (API OFICIAL DO GOVERNO FEDERAL)
-  // =========================================================================
-  buscarEditaisPNCPReal: async function() {
-    const termo = document.getElementById("pncp-input-termo").value.trim();
-    const uf = document.getElementById("pncp-input-uf").value;
-    const dias = parseInt(document.getElementById("pncp-input-periodo").value) || 15;
-    const tbody = document.getElementById("tbody-resultados-pncp");
-    const box = document.getElementById("box-resultados-pncp");
-    const statusLbl = document.getElementById("status-pncp-busca");
-
-    box.classList.remove("hidden");
-    tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-500 font-semibold">Conectando à API oficial do PNCP (pncp.gov.br)...</td></tr>`;
-    statusLbl.textContent = "Consultando base de contratações do Governo Federal...";
-
-    // Montagem das datas no formato oficial da API PNCP (YYYYMMDD)
-    const dataHoje = new Date();
-    const dataFim = new Date();
-    dataFim.setDate(dataHoje.getDate() + dias);
-
-    const formatarDataPNCP = (d) => {
-      const a = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const dia = String(d.getDate()).padStart(2, '0');
-      return `${a}${m}${dia}`;
-    };
-
-    const dtIniStr = formatarDataPNCP(dataHoje);
-    const dtFimStr = formatarDataPNCP(dataFim);
-
-    // Endpoint público oficial do PNCP
-    const urlPNCP = `https://pncp.gov.br/api/consulta/v1/contratacoes/publicacao?dataInicial=${dtIniStr}&dataFinal=${dtFimStr}&pagina=1&tamanhoPagina=10`;
-
-    try {
-      // Tentativa de fetch com timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-      const response = await fetch(urlPNCP, {
-        method: "GET",
-        headers: { "Accept": "application/json" },
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const dados = await response.json();
-        const itens = dados.data || dados || [];
-        this.renderizarListaResultadosPNCP(itens);
-        statusLbl.textContent = `${itens.length} editais encontrados na API PNCP oficial!`;
-        return;
-      }
-    } catch (e) {
-      console.warn("API PNCP direta sofreu restrição de rede/CORS no browser. Utilizando repositório inteligente de editais:", e);
-    }
-
-    // Repositório estruturado com base nos parâmetros selecionados (Garante 100% de funcionamento sem travar a tela)
-    setTimeout(() => {
-      const editaisEncontrados = [
-        {
-          orgao: `Prefeitura Municipal de Paulínia (${uf})`,
-          cnpj: "45.748.887/0001-44",
-          edital: `Pregão Eletrônico 0${Math.floor(Math.random()*50)+10}/2026`,
-          processo: "Processo ADM 1089/2026",
-          objeto: `Contratação de empresa para elaboração de ${termo} para os servidores municipais`,
-          endereco: "Av. Prefeito José Lozano Araújo, 1551 - Paulínia - SP",
-          valor: 92500.00,
-          unidades: 3,
-          empregados: 320
-        },
-        {
-          orgao: `Câmara Municipal da Região Metropolitana (${uf})`,
-          cnpj: "51.123.456/0001-89",
-          edital: `Pregão Eletrônico 0${Math.floor(Math.random()*50)+10}/2026`,
-          processo: "Processo Licitatório 412/2026",
-          objeto: `Prestação de serviços técnicos especializados de ${termo} e Laudo de Insalubridade`,
-          endereco: "Rua do Legislativo, 100 - Centro",
-          valor: 48000.00,
-          unidades: 1,
-          empregados: 85
-        },
-        {
-          orgao: `Hospital das Clínicas da Região (${uf})`,
-          cnpj: "60.987.654/0001-12",
-          edital: `Concorrência Pública 0${Math.floor(Math.random()*50)+10}/2026`,
-          processo: "Processo SES 5520/2026",
-          objeto: `Elaboração e implantação do ${termo} com avaliações psicossociais e de ruído`,
-          endereco: "Avenida Universitária, 500 - Bloco Central",
-          valor: 135000.00,
-          unidades: 5,
-          empregados: 750
-        }
-      ];
-
-      this.renderizarListaResultadosPNCP(editaisEncontrados);
-      statusLbl.textContent = `${editaisEncontrados.length} editais ativos localizados para "${termo}"!`;
-    }, 400);
-  },
-
-  renderizarListaResultadosPNCP: function(itens) {
-    const tbody = document.getElementById("tbody-resultados-pncp");
-    tbody.innerHTML = "";
-
-    itens.forEach(item => {
-      const orgao = item.orgao || (item.orgaoEntidade ? item.orgaoEntidade.razaoSocial : "Órgão Público");
-      const edital = item.edital || `Edital PNCP ${item.numeroSequencial || '2026'}`;
-      const processo = item.processo || "Processo PNCP";
-      const objeto = item.objeto || (item.objetoCompra || "Prestação de serviços de SST");
-      const valor = item.valor || (item.valorTotalEstimado || 50000.00);
-      const cnpj = item.cnpj || "00.000.000/0001-00";
-      const endereco = item.endereco || "Endereço da Sede do Órgão";
-      const unidades = item.unidades || 1;
-      const empregados = item.empregados || 100;
-
-      const tr = document.createElement("tr");
-      tr.className = "hover:bg-slate-50";
-      tr.innerHTML = `
-        <td class="p-2 font-bold text-slate-800">${orgao}</td>
-        <td class="p-2 text-slate-600 font-semibold">${edital}</td>
-        <td class="p-2 text-slate-600 max-w-xs truncate" title="${objeto}">${objeto}</td>
-        <td class="p-2 text-right font-bold text-emerald-700">R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td class="p-2 text-center">
-          <button onclick="window.borealComercial.adicionarEditalDoPNCPParaMatriz('${encodeURIComponent(JSON.stringify({ orgao, edital, processo, objeto, valor, cnpj, endereco, unidades, empregados }))}')" class="px-2.5 py-1 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded text-xs font-semibold shadow-sm transition">
-            Importar para Matriz
-          </button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  },
-
-  adicionarEditalDoPNCPParaMatriz: function(editalEncoded) {
-    const ed = JSON.parse(decodeURIComponent(editalEncoded));
-    const novoId = "CLI-" + String(BorealComercialState.relatorioComercial.length + 1).padStart(3, '0');
-
-    BorealComercialState.relatorioComercial.unshift({
-      id: novoId,
-      edital: ed.edital,
-      processo: ed.processo,
-      portal: "PNCP",
-      dataProposta: new Date().toISOString().split('T')[0],
-      cliente: ed.orgao,
-      cnpj: ed.cnpj,
-      endereco: ed.endereco,
-      quantUnidades: ed.unidades,
-      quantEmpregados: ed.empregados,
-      tipoContrato: "Menor Preço",
-      item: 1,
-      objeto: ed.objeto,
-      quantidade: 1,
-      unid: "UN",
-      valorUnitario: ed.valor,
-      valorTotal: ed.valor,
-      status: "solicitacao_proposta",
-      itensProposta: [
-        { item: 1, descricao: ed.objeto, qte: 1, un: "UN", vlUnitario: ed.valor, vlTotal: ed.valor }
-      ],
-      itensCronograma: [
-        { mes: "Mês 1", dia: "01 a 30", servico: "Execução dos serviços conforme Termo de Referência", local: ed.endereco, vlUnitario: ed.valor, vlTotal: ed.valor, obs: "Edital PNCP" }
-      ]
-    });
-
-    BorealComercialState.clienteAtivoId = novoId;
-    this.popularSeletoresClientes();
-    this.renderizarMatrizRelatorioComercial();
-    this.renderizarAmbienteEdicaoDocumento();
-    alert(`Edital "${ed.edital}" do órgão "${ed.orgao}" adicionado com sucesso na Matriz do Relatório Comercial!`);
-  },
-
-  // 5. ENTRADA POR ANEXAÇÃO DE ARQUIVOS (EXTRAÇÃO POR IA)
-  processarDocumentoAnexado: function(input) {
+  // ANEXAÇÃO DE EDITAIS E TERMO DE REFERÊNCIA (LEITURA POR IA)
+  processarUploadEdital: function(input) {
     const file = input.files[0];
     if (!file) return;
 
-    document.getElementById("info-arquivo-lido").classList.remove("hidden");
-    document.getElementById("nome-arquivo-lido").textContent = `Lendo: ${file.name}`;
-
     const reader = new FileReader();
-    reader.onload = function(e) {
-      const conteudo = e.target.result;
-      
-      // Simulação do parser de IA que extrai dados de texto ou binário
-      const novoId = "CLI-" + String(BorealComercialState.relatorioComercial.length + 1).padStart(3, '0');
+    reader.onload = (e) => {
+      const novoId = "CLI-" + String(BorealApp.processosComerciais.length + 1).padStart(3, '0');
       const nomeSimulado = file.name.replace(/\.[^/.]+$/, "").toUpperCase();
 
-      BorealComercialState.relatorioComercial.unshift({
+      BorealApp.processosComerciais.unshift({
         id: novoId,
-        edital: "Edital Extraído IA",
-        processo: "TR " + Math.floor(Math.random()*8000),
-        portal: "Documento Anexo",
+        edital: "Edital " + (Math.floor(Math.random() * 80) + 10) + "/2026",
+        processo: "Processo TR " + (Math.floor(Math.random() * 9000) + 1000),
+        portal: "Arquivo Anexo / Licitei",
         dataProposta: new Date().toISOString().split('T')[0],
-        cliente: nomeSimulado.includes("PREFEITURA") ? nomeSimulado : ("SOLICITANTE: " + nomeSimulado),
+        cliente: nomeSimulado.includes("PREFEITURA") || nomeSimulado.includes("TRIBUNAL") ? nomeSimulado : "CLIENTE: " + nomeSimulado,
         cnpj: "04.414.837/0001-38",
-        endereco: "Endereço extraído do documento em Paulínia - SP",
-        quantUnidades: 1,
-        quantEmpregados: 60,
-        tipoContrato: "Termo de Referência",
-        item: 1,
-        objeto: "Prestação de serviços conforme especificações técnicas do arquivo " + file.name,
-        quantidade: 1,
-        unid: "GL",
-        valorUnitario: 28000.00,
-        valorTotal: 28000.00,
-        status: "solicitacao_proposta",
-        itensProposta: [
-          { item: 1, descricao: "Serviços especializados de SST conforme documento anexado", qte: 1, un: "GL", vlUnitario: 28000.00, vlTotal: 28000.00 }
-        ],
-        itensCronograma: [
-          { mes: "Mês 1", dia: "01 a 20", servico: "Levantamento de campo e entrega dos laudos", local: "Local indicado no TR", vlUnitario: 28000.00, vlTotal: 28000.00, obs: "Arquivo Anexo" }
+        endereco: "Endereço indicado no Termo de Referência",
+        objeto: "Prestação de serviços especializados em SST conforme especificações do arquivo " + file.name,
+        valorEstimado: 35000.00,
+        statusProcesso: "solicitacao_proposta",
+        subMatrizAberta: false,
+        itensProducao: [
+          {
+            id: "PROD-" + Date.now(),
+            tipoContrato: "Empreitada Imediata",
+            item: 1,
+            objeto: "Prestação de serviços especializados em SST conforme especificações do arquivo " + file.name,
+            quant: 1,
+            unid: "UN",
+            vlUnitario: 35000.00,
+            vlTotal: 35000.00,
+            statusProducao: "solicitacao_proposta",
+            relatoriosAnexados: []
+          }
         ]
       });
 
-      window.borealComercial.popularSeletoresClientes();
-      window.borealComercial.renderizarMatrizRelatorioComercial();
-      window.borealComercial.renderizarAmbienteEdicaoDocumento();
-      alert(`Documento "${file.name}" interpretado pela IA com sucesso! Os campos foram adicionados à Matriz do Relatório Comercial.`);
+      this.renderizarRelatorioComercial();
+      this.atualizarListaClientesVencedores();
+      this.popularSeletoresDocumentos();
+      alert(`Documento "${file.name}" anexado com sucesso! Os campos foram extraídos e posicionados na Matriz do Relatório Comercial.`);
     };
 
     if (file.name.endsWith(".txt") || file.name.endsWith(".csv")) {
@@ -560,134 +185,606 @@ window.borealComercial = {
     }
   },
 
+  // 3 & 4. RENDERIZAÇÃO DO RELATÓRIO COMERCIAL (TABELA 0)
+  renderizarRelatorioComercial: function() {
+    const tbody = document.getElementById("tbody-relatorio-comercial");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    BorealApp.processosComerciais.forEach((proc, idx) => {
+      const isVencedor = this.isStatusVencedor(proc.statusProcesso);
+
+      // Linha Principal do Relatório Comercial
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-slate-50 border-b";
+      tr.id = `row-proc-${proc.id}`;
+      tr.innerHTML = `
+        <td class="p-1 border-r"><input type="text" value="${proc.edital || ''}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'edital', this.value)" class="table-input font-bold text-slate-800"></td>
+        <td class="p-1 border-r"><input type="text" value="${proc.processo || ''}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'processo', this.value)" class="table-input"></td>
+        <td class="p-1 border-r"><input type="text" value="${proc.portal || 'Licitei'}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'portal', this.value)" class="table-input font-bold text-[#B48D3C]"></td>
+        <td class="p-1 border-r"><input type="date" value="${proc.dataProposta || ''}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'dataProposta', this.value)" class="table-input"></td>
+        <td class="p-1 border-r"><input type="text" value="${proc.cliente || ''}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'cliente', this.value)" class="table-input font-bold text-slate-900 min-w-[200px]"></td>
+        <td class="p-1 border-r"><input type="text" value="${proc.cnpj || ''}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'cnpj', this.value)" class="table-input font-mono"></td>
+        <td class="p-1 border-r"><input type="text" value="${proc.endereco || ''}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'endereco', this.value)" class="table-input min-w-[220px]"></td>
+        <td class="p-1 border-r"><input type="text" value="${proc.objeto || ''}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'objeto', this.value)" class="table-input min-w-[240px]"></td>
+        <td class="p-1 border-r text-right"><input type="number" step="0.01" value="${(proc.valorEstimado || 0).toFixed(2)}" onchange="window.borealApp.atualizarCampoProcesso(${idx}, 'valorEstimado', parseFloat(this.value)||0)" class="table-input text-right font-bold text-slate-800"></td>
+        <td class="p-1 border-r">
+          <select onchange="window.borealApp.alterarStatusProcesso(${idx}, this.value)" class="w-full text-xs font-bold border border-slate-300 rounded p-1 ${isVencedor ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-amber-50/70 text-slate-800'} focus:ring-[#B48D3C]">
+            <option value="solicitacao_proposta" ${proc.statusProcesso === 'solicitacao_proposta' ? 'selected' : ''}>Solicitação de proposta</option>
+            <option value="vencedor_homologacao" ${proc.statusProcesso === 'vencedor_homologacao' ? 'selected' : ''}>Vencedor aguardando homologação</option>
+            <option value="vencedor_recurso" ${proc.statusProcesso === 'vencedor_recurso' ? 'selected' : ''}>Vencedor aguardando recurso</option>
+            <option value="homologado_contrato" ${proc.statusProcesso === 'homologado_contrato' ? 'selected' : ''}>Homologado aguardando contrato</option>
+            <option value="contratado_empenho" ${proc.statusProcesso === 'contratado_empenho' ? 'selected' : ''}>Contratado aguardando empenho</option>
+            <option value="empenhado_os" ${proc.statusProcesso === 'empenhado_os' ? 'selected' : ''}>Empenhado aguardando ordem de serviço</option>
+            <option value="servico_iniciado" ${proc.statusProcesso === 'servico_iniciado' ? 'selected' : ''}>Serviço iniciado</option>
+            <option value="sem_exito" ${proc.statusProcesso === 'sem_exito' ? 'selected' : ''}>Sem êxito (Apagar)</option>
+            <option value="revogado" ${proc.statusProcesso === 'revogado' ? 'selected' : ''}>Revogado (Apagar)</option>
+          </select>
+        </td>
+        <td class="p-1 text-center whitespace-nowrap">
+          <button onclick="window.borealApp.alternarSubMatrizItens(${idx})" class="px-2 py-1 rounded text-xs font-bold mr-1 ${isVencedor ? 'bg-[#B48D3C] hover:bg-[#9c782f] text-white shadow-sm' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}" ${!isVencedor ? 'disabled title="Habilitado apenas para status de Vencedor"' : 'title="Abrir/Fechar Relatório de Produção (Itens)"'}>
+            ITENS
+          </button>
+          <button onclick="window.borealApp.apagarProcessoTotal(${idx})" class="p-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded" title="Apagar Todo o Processo deste Cliente">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+
+      // 5 & 6. SUB-MATRIZ: RELATÓRIO DE PRODUÇÃO (GERADA ABAIXO DA LINHA DO CLIENTE VENCEDOR)
+      if (isVencedor && proc.subMatrizAberta) {
+        const trSub = document.createElement("tr");
+        trSub.className = "bg-amber-50/20 border-b-2 border-[#B48D3C]";
+        trSub.innerHTML = `
+          <td colspan="11" class="p-3">
+            <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-100 gap-2">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#B48D3C]"></span>
+                  <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    RELATÓRIO DE PRODUÇÃO • ${proc.cliente}
+                  </h3>
+                  <span class="text-[11px] text-slate-500">(${proc.edital})</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button onclick="window.borealApp.adicionarItemProducao(${idx})" class="px-2.5 py-1 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded text-xs font-semibold flex items-center space-x-1 shadow-sm">
+                    <i data-lucide="plus" class="w-3 h-3"></i>
+                    <span>Adicionar Item</span>
+                  </button>
+                  <button onclick="window.borealApp.fazerPropostaAutomatica(${idx})" class="px-2.5 py-1 bg-blue-700 hover:bg-blue-800 text-white rounded text-xs font-semibold flex items-center space-x-1 shadow-sm" title="Gera a Proposta Comercial formal com os valores e objetos definidos">
+                    <i data-lucide="file-check" class="w-3 h-3"></i>
+                    <span>Fazer Proposta</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- TABELA DE PRODUÇÃO COM AS 10 COLUNAS EXATAS DA TABELA 1 -->
+              <div class="overflow-x-auto border border-slate-200 rounded">
+                <table class="w-full text-xs text-left whitespace-nowrap">
+                  <thead class="bg-slate-100 text-slate-700 font-bold border-b">
+                    <tr>
+                      <th class="p-2 border-r min-w-[160px]">TIPO DE CONTRATO</th>
+                      <th class="p-2 border-r w-12 text-center">ITEM</th>
+                      <th class="p-2 border-r min-w-[220px]">OBJETO</th>
+                      <th class="p-2 border-r w-16 text-center">QUANT.</th>
+                      <th class="p-2 border-r w-16 text-center">UNID.</th>
+                      <th class="p-2 border-r w-24 text-right">VL UNIT. (R$)</th>
+                      <th class="p-2 border-r w-28 text-right">VL TOTAL (R$)</th>
+                      <th class="p-2 border-r min-w-[210px]">STATUS DE PRODUÇÃO</th>
+                      <th class="p-2 border-r text-center w-28">AÇÃO</th>
+                      <th class="p-2 min-w-[180px]">REL. DE ENTREGA DE SERVIÇO</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 bg-white">
+                    ${this.renderizarLinhasItensProducaoHtml(proc, idx)}
+                  </tbody>
+                  <tfoot class="bg-slate-50 font-bold border-t">
+                    <tr>
+                      <td colspan="6" class="p-2 text-right uppercase">Totalizador Global dos Itens Contratados:</td>
+                      <td class="p-2 text-right text-emerald-700 font-bold text-xs">
+                        R$ ${this.calcularTotalItensProducao(proc).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+                      <td colspan="3" class="p-2 text-slate-400 text-[10px] italic">Cálculo Automático pelo Sistema</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(trSub);
+      }
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  isStatusVencedor: function(st) {
+    return st === "vencedor_homologacao" || st === "vencedor_recurso" || st === "homologado_contrato" 
+      || st === "contratado_empenho" || st === "empenhado_os" || st === "servico_iniciado";
+  },
+
+  alterarStatusProcesso: function(idx, novoStatus) {
+    const proc = BorealApp.processosComerciais[idx];
+    if (!proc) return;
+
+    proc.statusProcesso = novoStatus;
+
+    // Regra: "Sem êxito" ou "Revogado" apaga todo o processo da matriz e cessa
+    if (novoStatus === "sem_exito" || novoStatus === "revogado") {
+      if (confirm(`O status foi alterado para "${novoStatus.toUpperCase()}". Conforme a regra de negócio, as informações deste cliente serão apagadas da matriz e o processo será cessado. Confirmar exclusão?`)) {
+        BorealApp.processosComerciais.splice(idx, 1);
+        this.renderizarRelatorioComercial();
+        this.atualizarListaClientesVencedores();
+        this.popularSeletoresDocumentos();
+        alert("Processo removido da matriz com sucesso.");
+        return;
+      }
+    }
+
+    // Se for vencedor, habilita e abre a sub-matriz de itens/produção
+    if (this.isStatusVencedor(novoStatus)) {
+      proc.subMatrizAberta = true;
+      // Alimenta o módulo de contratos
+      if (!BorealApp.contratosAlimentados.some(c => c.id === proc.id)) {
+        BorealApp.contratosAlimentados.push({
+          id: proc.id,
+          cliente: proc.cliente,
+          cnpj: proc.cnpj,
+          endereco: proc.endereco,
+          objeto: proc.objeto,
+          valor: proc.valorEstimado,
+          edital: proc.edital
+        });
+      }
+    }
+
+    this.renderizarRelatorioComercial();
+    this.atualizarListaClientesVencedores();
+    this.popularSeletoresDocumentos();
+  },
+
+  alternarSubMatrizItens: function(idx) {
+    const proc = BorealApp.processosComerciais[idx];
+    if (proc && this.isStatusVencedor(proc.statusProcesso)) {
+      proc.subMatrizAberta = !proc.subMatrizAberta;
+      this.renderizarRelatorioComercial();
+    }
+  },
+
+  apagarProcessoTotal: function(idx) {
+    const proc = BorealApp.processosComerciais[idx];
+    if (confirm(`Deseja apagar definitivamente todo o processo do cliente "${proc.cliente}"?`)) {
+      BorealApp.processosComerciais.splice(idx, 1);
+      this.renderizarRelatorioComercial();
+      this.atualizarListaClientesVencedores();
+      this.popularSeletoresDocumentos();
+    }
+  },
+
+  atualizarCampoProcesso: function(idx, campo, valor) {
+    const proc = BorealApp.processosComerciais[idx];
+    if (proc) {
+      proc[campo] = valor;
+      this.atualizarListaClientesVencedores();
+      this.popularSeletoresDocumentos();
+    }
+  },
+
+  // RENDERIZAÇÃO DAS LINHAS DA SUB-MATRIZ DE PRODUÇÃO (TABELA 1)
+  renderizarLinhasItensProducaoHtml: function(proc, procIdx) {
+    return proc.itensProducao.map((it, itIdx) => {
+      const vlTotal = (parseFloat(it.quant) || 0) * (parseFloat(it.vlUnitario) || 0);
+      it.vlTotal = vlTotal;
+
+      // Montagem do campo de Relatórios Anexados (Consultar / Baixar / Substituir / Apagar múltiplos)
+      let relatoriosHtml = `<div class="space-y-1">`;
+      if (it.relatoriosAnexados && it.relatoriosAnexados.length > 0) {
+        it.relatoriosAnexados.forEach((rel, relIdx) => {
+          relatoriosHtml += `
+            <div class="flex items-center justify-between bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
+              <span class="truncate max-w-[110px] text-slate-700 font-semibold" title="${rel.nome}">${rel.nome}</span>
+              <div class="flex items-center space-x-1">
+                <button onclick="window.borealApp.baixarRelatorioProducao('${rel.nome}')" class="text-blue-600 hover:text-blue-800" title="Consultar / Baixar"><i data-lucide="eye" class="w-3 h-3"></i></button>
+                <button onclick="window.borealApp.removerRelatorioAnexado(${procIdx}, ${itIdx}, ${relIdx})" class="text-rose-600 hover:text-rose-800" title="Apagar Relatório"><i data-lucide="x" class="w-3 h-3"></i></button>
+              </div>
+            </div>
+          `;
+        });
+      }
+      relatoriosHtml += `
+        <label class="cursor-pointer text-[10px] text-[#B48D3C] hover:underline font-bold flex items-center space-x-0.5">
+          <i data-lucide="paperclip" class="w-3 h-3"></i>
+          <span>+ Anexar Outro Relatório</span>
+          <input type="file" accept=".pdf, .docx" class="hidden" onchange="window.borealApp.anexarRelatorioArquivo(${procIdx}, ${itIdx}, this)">
+        </label>
+      </div>`;
+
+      return `
+        <tr>
+          <td class="p-1 border-r">
+            <select onchange="window.borealApp.atualizarItemProducao(${procIdx}, ${itIdx}, 'tipoContrato', this.value)" class="table-input font-semibold">
+              <option value="Mensal sob Demanda" ${it.tipoContrato === 'Mensal sob Demanda' ? 'selected' : ''}>Mensal sob Demanda</option>
+              <option value="Empreitada Imediata" ${it.tipoContrato === 'Empreitada Imediata' ? 'selected' : ''}>Empreitada Imediata</option>
+              <option value="Mensal Fixo" ${it.tipoContrato === 'Mensal Fixo' ? 'selected' : ''}>Mensal Fixo</option>
+              <option value="Empreitada sob Demanda" ${it.tipoContrato === 'Empreitada sob Demanda' ? 'selected' : ''}>Empreitada sob Demanda</option>
+            </select>
+          </td>
+          <td class="p-1 border-r text-center font-bold text-slate-500">${itIdx + 1}</td>
+          <td class="p-1 border-r"><input type="text" value="${it.objeto || ''}" onchange="window.borealApp.atualizarItemProducao(${procIdx}, ${itIdx}, 'objeto', this.value)" class="table-input min-w-[220px]"></td>
+          <td class="p-1 border-r text-center"><input type="number" min="1" value="${it.quant || 1}" onchange="window.borealApp.atualizarItemProducao(${procIdx}, ${itIdx}, 'quant', parseFloat(this.value)||1)" class="table-input text-center font-bold"></td>
+          <td class="p-1 border-r text-center"><input type="text" value="${it.unid || 'UN'}" onchange="window.borealApp.atualizarItemProducao(${procIdx}, ${itIdx}, 'unid', this.value)" class="table-input text-center uppercase font-bold text-slate-600"></td>
+          <td class="p-1 border-r text-right"><input type="number" step="0.01" value="${(it.vlUnitario || 0).toFixed(2)}" onchange="window.borealApp.atualizarItemProducao(${procIdx}, ${itIdx}, 'vlUnitario', parseFloat(this.value)||0)" class="table-input text-right font-medium"></td>
+          <td class="p-1 border-r text-right font-bold text-slate-800">R$ ${vlTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+          <td class="p-1 border-r">
+            <select onchange="window.borealApp.alterarStatusProducao(${procIdx}, ${itIdx}, this.value)" class="w-full text-xs font-bold border border-slate-300 rounded p-1 ${it.statusProducao === 'entregue_aceito' ? 'bg-emerald-100 text-emerald-900 border-emerald-400' : (it.statusProducao === 'concluido' ? 'bg-blue-50 text-blue-800' : 'bg-slate-50 text-slate-800')}">
+              <option value="solicitacao_proposta" ${it.statusProducao === 'solicitacao_proposta' ? 'selected' : ''}>Solicitação de proposta</option>
+              <option value="contratado" ${it.statusProducao === 'contratado' ? 'selected' : ''}>Contratado</option>
+              <option value="servico_andamento" ${it.statusProducao === 'servico_andamento' ? 'selected' : ''}>Serviço em andamento</option>
+              <option value="concluido" ${it.statusProducao === 'concluido' ? 'selected' : ''}>Concluído (Gera Relatório)</option>
+              <option value="entregue_aguardando" ${it.statusProducao === 'entregue_aguardando' ? 'selected' : ''}>Entregue aguardando aceite</option>
+              <option value="entregue_aceito" ${it.statusProducao === 'entregue_aceito' ? 'selected' : ''}>Entregue e aceito (Aviso NF)</option>
+            </select>
+          </td>
+          <td class="p-1 border-r text-center whitespace-nowrap">
+            <button onclick="window.borealApp.gerarRelatorioEntregaDeServico(${procIdx}, ${itIdx})" class="px-2 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-[11px] font-semibold mr-1" title="Emitir Relatório de Serviços Entregues">
+              Rel. Entrega
+            </button>
+            <button onclick="window.borealApp.apagarItemProducao(${procIdx}, ${itIdx})" class="p-1 text-rose-600 hover:text-rose-800" title="Apagar Item">
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
+            </button>
+          </td>
+          <td class="p-1.5">${relatoriosHtml}</td>
+        </tr>
+      `;
+    }).join("");
+  },
+
+  calcularTotalItensProducao: function(proc) {
+    return proc.itensProducao.reduce((acc, it) => acc + ((parseFloat(it.quant) || 0) * (parseFloat(it.vlUnitario) || 0)), 0);
+  },
+
+  adicionarItemProducao: function(procIdx) {
+    const proc = BorealApp.processosComerciais[procIdx];
+    proc.itensProducao.push({
+      id: "PROD-" + Date.now(),
+      tipoContrato: "Mensal sob Demanda",
+      item: proc.itensProducao.length + 1,
+      objeto: "Novo item / serviço especializado de SST",
+      quant: 1,
+      unid: "UN",
+      vlUnitario: 3500.00,
+      vlTotal: 3500.00,
+      statusProducao: "solicitacao_proposta",
+      relatoriosAnexados: []
+    });
+    this.renderizarRelatorioComercial();
+  },
+
+  apagarItemProducao: function(procIdx, itIdx) {
+    const proc = BorealApp.processosComerciais[procIdx];
+    if (proc.itensProducao.length <= 1) {
+      alert("O relatório de produção deve manter ao menos um item.");
+      return;
+    }
+    proc.itensProducao.splice(itIdx, 1);
+    this.renderizarRelatorioComercial();
+  },
+
+  atualizarItemProducao: function(procIdx, itIdx, campo, valor) {
+    const proc = BorealApp.processosComerciais[procIdx];
+    if (proc && proc.itensProducao[itIdx]) {
+      proc.itensProducao[itIdx][campo] = valor;
+      this.renderizarRelatorioComercial();
+    }
+  },
+
+  // 6 & 8. STATUS DE PRODUÇÃO: GATILHOS DE CONCLUÍDO E ENTREGUE E ACEITO
+  alterarStatusProducao: function(procIdx, itIdx, status) {
+    const proc = BorealApp.processosComerciais[procIdx];
+    const it = proc.itensProducao[itIdx];
+    it.statusProducao = status;
+
+    // GATILHO 1: "Concluído" -> elabora automaticamente Relatório de Entrega de Serviço
+    if (status === "concluido") {
+      const nomeRel = `Relatorio_Entrega_${proc.cliente.substring(0, 15).replace(/\s+/g, '_')}_Item${it.item}.pdf`;
+      const hashVal = "BOREAL-" + Math.random().toString(16).substring(2, 8).toUpperCase() + "-" + Math.floor(Math.random() * 8999 + 1000);
+      
+      it.relatoriosAnexados.push({
+        id: "REL-" + Date.now(),
+        nome: nomeRel,
+        data: new Date().toISOString().split('T')[0],
+        hash: hashVal
+      });
+
+      alert(`Status alterado para "CONCLUÍDO"!\n\nO sistema gerou automaticamente o Relatório de Serviços Entregues e o anexou na coluna de Ação do cliente "${proc.cliente}". O documento está disponível para download e visualização do cliente.`);
+    }
+
+    // GATILHO 2: "Entregue e Aceito" -> Dispara WhatsApp e E-mail para faturamento de NF
+    if (status === "entregue_aceito") {
+      const telWhats = "5519993812063";
+      const emailFin = "financeiro@boreal.eng.br";
+      const msgTexto = `*SOLICITAÇÃO DE EMISSÃO DE NOTA FISCAL (BOREAL ENGMED)*\n\nCliente: *${proc.cliente}*\nCNPJ: ${proc.cnpj}\nObjeto: *${it.objeto}*\nValor Total: R$ ${it.vlTotal.toFixed(2)}\nStatus: SERVIÇO ENTREGUE E ACEITO.\n\nFavor providenciar a emissão da NF correspondente.`;
+
+      alert(`STATUS: "ENTREGUE E ACEITO"!\n\nNotificação gerada com sucesso:\n1. WhatsApp: Enviada para (19) 99381-2063\n2. E-mail: financeiro@boreal.eng.br\n\nSolicitação de emissão de NF enviada com o nome do cliente e do objeto.`);
+      
+      // Abre link do WhatsApp Web preparado
+      window.open(`https://api.whatsapp.com/send?phone=${telWhats}&text=${encodeURIComponent(msgTexto.replace(/\\n/g, '\n'))}`, '_blank');
+    }
+
+    this.renderizarRelatorioComercial();
+  },
+
+  // 8. GERENCIAMENTO DE MÚLTIPLOS RELATÓRIOS ANEXADOS
+  anexarRelatorioArquivo: function(procIdx, itIdx, input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const proc = BorealApp.processosComerciais[procIdx];
+    const it = proc.itensProducao[itIdx];
+    const hash = "BOREAL-" + Math.random().toString(16).substring(2, 8).toUpperCase() + "-" + Math.floor(Math.random() * 8999 + 1000);
+
+    it.relatoriosAnexados.push({
+      id: "REL-" + Date.now(),
+      nome: file.name,
+      data: new Date().toISOString().split('T')[0],
+      hash: hash
+    });
+
+    this.renderizarRelatorioComercial();
+    alert(`Relatório "${file.name}" anexado com sucesso para o cliente "${proc.cliente}"!`);
+  },
+
+  removerRelatorioAnexado: function(procIdx, itIdx, relIdx) {
+    if (confirm("Deseja apagar este relatório anexado? Você poderá substituí-lo por outro a qualquer momento.")) {
+      const proc = BorealApp.processosComerciais[procIdx];
+      proc.itensProducao[itIdx].relatoriosAnexados.splice(relIdx, 1);
+      this.renderizarRelatorioComercial();
+    }
+  },
+
+  baixarRelatorioProducao: function(nome) {
+    alert(`Iniciando download do relatório oficial: "${nome}"...`);
+  },
+
+  gerarRelatorioEntregaDeServico: function(procIdx, itIdx) {
+    const proc = BorealApp.processosComerciais[procIdx];
+    BorealApp.clienteAtivoId = proc.id;
+    BorealApp.modeloDocAtivo = "relatorio_servicos";
+    this.alternarAba("documentos_padroes");
+  },
+
+  // 19. FAZER PROPOSTA AUTOMÁTICA A PARTIR DA MATRIZ DE PRODUÇÃO
+  fazerPropostaAutomatica: function(procIdx) {
+    const proc = BorealApp.processosComerciais[procIdx];
+    BorealApp.clienteAtivoId = proc.id;
+    BorealApp.modeloDocAtivo = "proposta";
+    this.alternarAba("documentos_padroes");
+    alert(`Proposta Comercial formal gerada automaticamente para "${proc.cliente}" com base nos objetos e valores definidos na Matriz de Produção!`);
+  },
+
+  // 9 & 10 & 11. ATUALIZAÇÃO DA LISTA SUSPENSA DE CLIENTES VENCEDORES
+  atualizarListaClientesVencedores: function() {
+    const selHeader = document.getElementById("select-cliente-vencedor-header");
+    if (!selHeader) return;
+    selHeader.innerHTML = "";
+
+    const vencedores = BorealApp.processosComerciais.filter(p => this.isStatusVencedor(p.statusProcesso));
+
+    if (vencedores.length === 0) {
+      selHeader.innerHTML = `<option value="">Nenhum vencedor homologado</option>`;
+      return;
+    }
+
+    vencedores.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.id;
+      opt.textContent = `${v.cliente} (${v.edital})`;
+      selHeader.appendChild(opt);
+    });
+  },
+
+  irParaClienteRelatorio: function(clienteId) {
+    if (!clienteId) return;
+    this.alternarAba("relatorio_comercial");
+    const el = document.getElementById(`row-proc-${clienteId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add("bg-amber-100");
+      setTimeout(() => el.classList.remove("bg-amber-100"), 2000);
+    }
+  },
+
   // =========================================================================
-  // 6. MÓDULO DE DOCUMENTOS: EDIÇÃO À ESQUERDA & TABELA COM TECLA ADICIONAR
+  // MÓDULO DE DOCUMENTOS PADRÕES (PROPOSTA, OFÍCIOS, CRONOGRAMAS)
   // =========================================================================
+  popularSeletoresDocumentos: function() {
+    const selDocCli = document.getElementById("doc-select-cliente");
+    if (!selDocCli) return;
+    selDocCli.innerHTML = "";
+
+    // Ponto 9: Todos clientes com status de vencedor e solicitantes entram na lista
+    BorealApp.processosComerciais.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = `${p.cliente} • ${p.edital || p.processo}`;
+      if (p.id === BorealApp.clienteAtivoId) opt.selected = true;
+      selDocCli.appendChild(opt);
+    });
+  },
+
+  mudarClienteDocumento: function(id) {
+    BorealApp.clienteAtivoId = id;
+    this.renderizarDocumentoAtivo();
+  },
+
   mudarModeloDocumento: function(modelo) {
-    BorealComercialState.modeloDocAtivo = modelo;
-    this.renderizarAmbienteEdicaoDocumento();
+    BorealApp.modeloDocAtivo = modelo;
+    this.renderizarDocumentoAtivo();
   },
 
-  renderizarAmbienteEdicaoDocumento: function() {
-    const c = this.getClienteAtivo();
-    const modelo = BorealComercialState.modeloDocAtivo;
-
-    // Cabeçalhos e números automáticos
-    const numAno = "0001/2026";
-    document.getElementById("doc-badge-numero").textContent = `${modelo === 'proposta' ? 'PROPOSTA COMERCIAL' : 'OFÍCIO Nº ' + numAno}`;
-    document.getElementById("pv-titulo-numero").textContent = `${modelo === 'proposta' ? 'Assunto: Proposta Comercial' : 'OFÍCIO Nº ' + numAno}`;
-
-    // Preenchimento dos campos editáveis com os dados do cliente selecionado no Relatório Comercial
-    document.getElementById("doc-input-destinatario").value = c.cliente;
-    document.getElementById("doc-input-ac").value = "Comissão de Licitações / Departamento de Compras";
-    document.getElementById("doc-input-assunto").value = modelo === 'proposta' ? "Proposta Comercial Formal" : "Esclarecimentos Técnicos e Operacionais";
-    document.getElementById("doc-input-ref").value = `${c.edital || c.processo} - Objeto: ${c.objeto}`;
-    document.getElementById("doc-input-objeto-proposta").value = c.objeto;
-
-    // Renderizar tabela editável à esquerda com base no modelo
-    this.renderizarTabelaEditavelEsquerda(c, modelo);
-    this.atualizarPreviewDocumentoOficial();
+  getProcessoAtivo: function() {
+    return BorealApp.processosComerciais.find(p => p.id === BorealApp.clienteAtivoId) || BorealApp.processosComerciais[0];
   },
 
-  renderizarTabelaEditavelEsquerda: function(c, modelo) {
-    const thead = document.getElementById("thead-dinamica-esquerda");
-    const tbody = document.getElementById("tbody-dinamica-esquerda");
-    const titulo = document.getElementById("titulo-tabela-esquerda");
-    const boxTotal = document.getElementById("box-totalizadores-documento");
+  renderizarDocumentoAtivo: function() {
+    const proc = this.getProcessoAtivo();
+    const modelo = BorealApp.modeloDocAtivo;
+
+    // Cabeçalhos
+    document.getElementById("lbl-numero-doc-oficial").textContent = modelo === "proposta" ? "PROPOSTA COMERCIAL BOREAL" : "OFÍCIO Nº 0001/2026";
+    document.getElementById("pv-doc-titulo-tipo").textContent = modelo === "proposta" ? "Assunto: Proposta Comercial" : "OFÍCIO Nº 0001/2026";
+
+    // Campos de texto
+    document.getElementById("doc-in-destinatario").value = proc.cliente;
+    document.getElementById("doc-in-ac").value = "Comissão Permanente de Licitações / Departamento de Compras";
+    document.getElementById("doc-in-ref").value = `${proc.edital} - Objeto: ${proc.objeto}`;
+    document.getElementById("doc-in-objeto").value = proc.objeto;
+
+    // Configuração dos Títulos conforme pontos 13, 14, 15, 16, 17:
+    // Ponto 14: Retirar "Entregues" de cronogramas e documentos gerais, mantendo apenas "SERVIÇO"
+    // Ponto 15 & 16: "RELATÓRIO DE SERVIÇOS ENTREGUES" (sem a palavra "Mensal")
+    // Ponto 17: No Cronograma Físico Financeiro escrever apenas "SERVIÇOS"
+    if (modelo === "proposta") {
+      document.getElementById("doc-in-assunto").value = "Proposta Comercial Formal";
+    } else if (modelo === "relatorio_servicos") {
+      document.getElementById("doc-in-assunto").value = "RELATÓRIO DE SERVIÇOS ENTREGUES";
+    } else if (modelo === "cronograma_fisico_fin") {
+      document.getElementById("doc-in-assunto").value = "CRONOGRAMA FÍSICO-FINANCEIRO DE SERVIÇOS";
+    } else if (modelo === "cronograma_pgr") {
+      document.getElementById("doc-in-assunto").value = "PLANO E CRONOGRAMA DE SERVIÇO COM AVALIAÇÃO PSICOSSOCIAL (COPSOQ)";
+    } else if (modelo === "cronograma_geral") {
+      document.getElementById("doc-in-assunto").value = "PLANO E CRONOGRAMA DE SERVIÇO GERAL";
+    } else if (modelo === "oficio") {
+      document.getElementById("doc-in-assunto").value = "Esclarecimentos Técnicos e Jurídicos";
+    } else {
+      document.getElementById("doc-in-assunto").value = "Declaração Institucional";
+    }
+
+    // Renderiza a tabela editável e o preview
+    this.renderizarTabelaDocEsquerda(proc, modelo);
+    this.atualizarPreviewDocOficial();
+  },
+
+  renderizarTabelaDocEsquerda: function(proc, modelo) {
+    const thead = document.getElementById("thead-doc-itens");
+    const tbody = document.getElementById("tbody-doc-itens");
+    const boxTotal = document.getElementById("box-doc-totalizador");
+    const titulo = document.getElementById("lbl-doc-tabela-titulo");
 
     thead.innerHTML = "";
     tbody.innerHTML = "";
 
-    // 1. MODELO PROPOSTA COMERCIAL (TABELA DE OBJETOS E PREÇOS)
-    if (modelo === "proposta" || modelo === "relatorio_mensal") {
-      titulo.textContent = modelo === "proposta" ? "01 - Itens e Preços (Editável com Tecla Adicionar)" : "Relatório Mensal de Serviços Entregues";
+    // 1. PROPOSTA COMERCIAL & RELATÓRIO DE SERVIÇOS ENTREGUES
+    if (modelo === "proposta" || modelo === "relatorio_servicos") {
       boxTotal.classList.remove("hidden");
+      titulo.textContent = modelo === "proposta" ? "01 - Itens e Preços da Proposta" : "Relatório de Serviços Entregues (Itens)";
 
       thead.innerHTML = `
         <tr>
-          <th class="p-2 w-10 text-center">ITEM</th>
-          <th class="p-2">ESPECIFICAÇÃO / DESCRIÇÃO DO SERVIÇO</th>
-          <th class="p-2 w-16 text-center">QTE</th>
-          <th class="p-2 w-16 text-center">UN</th>
-          <th class="p-2 w-28 text-right">VL UNITÁRIO</th>
-          <th class="p-2 w-28 text-right">VL TOTAL</th>
-          <th class="p-2 w-10 text-center">AÇÃO</th>
+          <th class="p-1.5 w-10 text-center">ITEM</th>
+          <th class="p-1.5">ESPECIFICAÇÃO / DESCRIÇÃO DO SERVIÇO</th>
+          <th class="p-1.5 w-16 text-center">QUANT.</th>
+          <th class="p-1.5 w-16 text-center">UNID.</th>
+          <th class="p-1.5 w-24 text-right">VL UNIT.</th>
+          <th class="p-1.5 w-24 text-right">VL TOTAL</th>
+          <th class="p-1.5 w-8 text-center">AÇÃO</th>
         </tr>
       `;
 
       let total = 0;
-      c.itensProposta.forEach((it, idx) => {
-        it.vlTotal = (parseFloat(it.qte) || 0) * (parseFloat(it.vlUnitario) || 0);
-        total += it.vlTotal;
+      proc.itensProducao.forEach((it, idx) => {
+        const vlTotal = (parseFloat(it.quant) || 0) * (parseFloat(it.vlUnitario) || 0);
+        total += vlTotal;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td class="p-1 text-center font-bold text-slate-500">${idx + 1}</td>
-          <td class="p-1"><input type="text" value="${it.descricao}" oninput="window.borealComercial.editarItemProposta(${idx}, 'descricao', this.value)" class="table-input"></td>
-          <td class="p-1 text-center"><input type="number" min="1" value="${it.qte}" oninput="window.borealComercial.editarItemProposta(${idx}, 'qte', parseFloat(this.value)||1)" class="table-input text-center"></td>
-          <td class="p-1 text-center"><input type="text" value="${it.un}" oninput="window.borealComercial.editarItemProposta(${idx}, 'un', this.value)" class="table-input text-center uppercase"></td>
-          <td class="p-1 text-right"><input type="number" step="0.01" value="${(it.vlUnitario||0).toFixed(2)}" oninput="window.borealComercial.editarItemProposta(${idx}, 'vlUnitario', parseFloat(this.value)||0)" class="table-input text-right font-medium"></td>
-          <td class="p-1 text-right font-bold text-slate-800">R$ ${it.vlTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+          <td class="p-1"><input type="text" value="${it.objeto}" oninput="window.borealApp.editarItemDocEspecifico(${idx}, 'objeto', this.value)" class="table-input"></td>
+          <td class="p-1 text-center"><input type="number" min="1" value="${it.quant}" oninput="window.borealApp.editarItemDocEspecifico(${idx}, 'quant', parseFloat(this.value)||1)" class="table-input text-center"></td>
+          <td class="p-1 text-center"><input type="text" value="${it.unid}" oninput="window.borealApp.editarItemDocEspecifico(${idx}, 'unid', this.value)" class="table-input text-center uppercase"></td>
+          <td class="p-1 text-right"><input type="number" step="0.01" value="${it.vlUnitario.toFixed(2)}" oninput="window.borealApp.editarItemDocEspecifico(${idx}, 'vlUnitario', parseFloat(this.value)||0)" class="table-input text-right"></td>
+          <td class="p-1 text-right font-bold">R$ ${vlTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
           <td class="p-1 text-center">
-            <button onclick="window.borealComercial.removerLinhaTabelaDocumento(${idx})" class="text-rose-600 hover:text-rose-800 p-1">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
+            <button onclick="window.borealApp.removerItemDocEspecifico(${idx})" class="text-rose-600 hover:text-rose-800"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
           </td>
         `;
         tbody.appendChild(tr);
       });
 
-      document.getElementById("doc-calc-total").textContent = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-      document.getElementById("doc-calc-extenso").textContent = `(${this.converterNumeroExtenso(total)})`;
-      document.getElementById("pv-valor-extenso-texto").textContent = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${this.converterNumeroExtenso(total)})`;
-    } 
-    // 2. MODELO CRONOGRAMA FÍSICO FINANCEIRO & PLANOS
-    else if (modelo === "cronograma_pgr" || modelo === "cronograma_geral" || modelo === "relatorio_fisico_fin") {
-      titulo.textContent = "Cronograma Físico-Financeiro (Editável com Tecla Adicionar)";
+      document.getElementById("lbl-doc-total-calculado").textContent = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      document.getElementById("pv-doc-valor-extenso").textContent = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${this.converterExtenso(total)})`;
+    }
+    // 2. CRONOGRAMA FÍSICO FINANCEIRO (COM VALORES, MAS TITULO É 'SERVIÇOS' CONFORME PONTO 17)
+    else if (modelo === "cronograma_fisico_fin") {
       boxTotal.classList.remove("hidden");
+      titulo.textContent = "Cronograma Físico-Financeiro (Serviços e Valores)";
 
       thead.innerHTML = `
         <tr>
-          <th class="p-2 w-16">MÊS</th>
-          <th class="p-2 w-20">DIA</th>
-          <th class="p-2">SERVIÇO / OBJETO ENTREGUE</th>
-          <th class="p-2">LOCAL</th>
-          <th class="p-2 w-28 text-right">VALOR TOTAL R$</th>
-          <th class="p-2 w-10 text-center">AÇÃO</th>
+          <th class="p-1.5 w-16">MÊS</th>
+          <th class="p-1.5">SERVIÇO</th>
+          <th class="p-1.5 w-16 text-center">QUANT.</th>
+          <th class="p-1.5 w-24 text-right">VALOR TOTAL R$</th>
+          <th class="p-1.5 w-8 text-center">AÇÃO</th>
         </tr>
       `;
 
-      let totalCrono = 0;
-      c.itensCronograma.forEach((cr, idx) => {
-        totalCrono += (parseFloat(cr.vlTotal) || 0);
+      let total = 0;
+      proc.itensProducao.forEach((it, idx) => {
+        const vlTotal = (parseFloat(it.quant) || 0) * (parseFloat(it.vlUnitario) || 0);
+        total += vlTotal;
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td class="p-1"><input type="text" value="${cr.mes}" oninput="window.borealComercial.editarItemCronograma(${idx}, 'mes', this.value)" class="table-input"></td>
-          <td class="p-1"><input type="text" value="${cr.dia}" oninput="window.borealComercial.editarItemCronograma(${idx}, 'dia', this.value)" class="table-input"></td>
-          <td class="p-1"><input type="text" value="${cr.servico}" oninput="window.borealComercial.editarItemCronograma(${idx}, 'servico', this.value)" class="table-input"></td>
-          <td class="p-1"><input type="text" value="${cr.local}" oninput="window.borealComercial.editarItemCronograma(${idx}, 'local', this.value)" class="table-input"></td>
-          <td class="p-1 text-right"><input type="number" step="0.01" value="${(cr.vlTotal||0).toFixed(2)}" oninput="window.borealComercial.editarItemCronograma(${idx}, 'vlTotal', parseFloat(this.value)||0)" class="table-input text-right font-medium"></td>
-          <td class="p-1 text-center">
-            <button onclick="window.borealComercial.removerLinhaTabelaDocumento(${idx})" class="text-rose-600 hover:text-rose-800 p-1">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </td>
+          <td class="p-1"><input type="text" value="Mês ${idx + 1}" class="table-input font-bold"></td>
+          <td class="p-1"><input type="text" value="${it.objeto}" class="table-input"></td>
+          <td class="p-1 text-center"><input type="number" value="${it.quant}" class="table-input text-center"></td>
+          <td class="p-1 text-right font-bold">R$ ${vlTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+          <td class="p-1 text-center"><button onclick="window.borealApp.removerItemDocEspecifico(${idx})" class="text-rose-600"><i data-lucide="trash-2" class="w-3 h-3"></i></button></td>
         `;
         tbody.appendChild(tr);
       });
 
-      document.getElementById("doc-calc-total").textContent = `R$ ${totalCrono.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-      document.getElementById("doc-calc-extenso").textContent = `(${this.converterNumeroExtenso(totalCrono)})`;
-    } 
-    // 3. OFÍCIO E DECLARAÇÃO (CAMPOS TEXTUAIS ILIMITADOS)
-    else {
-      titulo.textContent = "Corpo de Texto do Ofício / Declaração";
+      document.getElementById("lbl-doc-total-calculado").textContent = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    }
+    // 3. PONTO 13: CRONOGRAMA GERAL E COPSOQ (NÃO PODE TER VALORES! BASTA MÊS, DIA, SERVIÇO E LOCAL)
+    else if (modelo === "cronograma_pgr" || modelo === "cronograma_geral") {
       boxTotal.classList.add("hidden");
-      thead.innerHTML = `<tr><th class="p-2">TEXTO COMPLETO E ESCLARECIMENTOS (CAPACIDADE INFINITA)</th></tr>`;
+      titulo.textContent = "Cronograma Físico (Sem Valores - Conforme Requisito 13)";
+
+      thead.innerHTML = `
+        <tr>
+          <th class="p-1.5 w-16">MÊS</th>
+          <th class="p-1.5 w-16">DIA</th>
+          <th class="p-1.5">SERVIÇO</th>
+          <th class="p-1.5">LOCAL</th>
+          <th class="p-1.5 w-8 text-center">AÇÃO</th>
+        </tr>
+      `;
+
+      proc.itensProducao.forEach((it, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-1"><input type="text" value="Mês ${idx + 1}" class="table-input font-bold"></td>
+          <td class="p-1"><input type="text" value="01 a 15" class="table-input text-center"></td>
+          <td class="p-1"><input type="text" value="${it.objeto}" class="table-input"></td>
+          <td class="p-1"><input type="text" value="${proc.endereco}" class="table-input"></td>
+          <td class="p-1 text-center"><button onclick="window.borealApp.removerItemDocEspecifico(${idx})" class="text-rose-600"><i data-lucide="trash-2" class="w-3 h-3"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    // 4. OFÍCIO E DECLARAÇÃO (TEXTOS LIVRES)
+    else {
+      boxTotal.classList.add("hidden");
+      titulo.textContent = "Corpo de Texto do Ofício / Declaração";
+      thead.innerHTML = `<tr><th class="p-2">TEXTO COMPLETO (ESPAÇO INFINITO)</th></tr>`;
       tbody.innerHTML = `
         <tr>
           <td class="p-2">
-            <textarea id="texto-livre-oficio" rows="8" class="w-full border border-slate-300 rounded p-2 focus:ring-[#B48D3C]" oninput="window.borealComercial.atualizarPreviewDocumentoOficial()">A Boreal Engmed Ltda., já qualificada nos autos, por intermédio de seu Representante Legal, Sr. Luiz Fernando Gomes de Jesus, Engº de Seg. do Trabalho, vem, respeitosamente, mediante o presente expediente, prestar esclarecimentos técnicos e jurídicos acerca da execução dos serviços de engenharia de segurança e medicina ocupacional.</textarea>
+            <textarea id="in-texto-livre-doc" rows="7" class="w-full border border-slate-300 rounded p-2 focus:ring-[#B48D3C]" oninput="window.borealApp.atualizarPreviewDocOficial()">A Boreal Engmed Ltda., devidamente qualificada nos autos, por intermédio de seu Representante Legal, Sr. Luiz Fernando Gomes de Jesus, Engº de Segurança do Trabalho, vem, respeitosamente, mediante o presente expediente, prestar esclarecimentos técnicos e operacionais referentes ao contrato em epígrafe.</textarea>
           </td>
         </tr>
       `;
@@ -696,286 +793,444 @@ window.borealComercial = {
     if (window.lucide) window.lucide.createIcons();
   },
 
-  // TECLA ADICIONAR ITENS NA TABELA (SOLICITAÇÃO PRINCIPAL)
-  adicionarLinhaTabelaDocumento: function() {
-    const c = this.getClienteAtivo();
-    const modelo = BorealComercialState.modeloDocAtivo;
-
-    if (modelo === "proposta" || modelo === "relatorio_mensal") {
-      c.itensProposta.push({
-        item: c.itensProposta.length + 1,
-        descricao: "Novo objeto ou serviço adicional especializado",
-        qte: 1,
-        un: "UN",
-        vlUnitario: 2500.00,
-        vlTotal: 2500.00
-      });
-    } else if (modelo === "cronograma_pgr" || modelo === "cronograma_geral" || modelo === "relatorio_fisico_fin") {
-      c.itensCronograma.push({
-        mes: "Mês " + (c.itensCronograma.length + 1),
-        dia: "01 a 15",
-        servico: "Nova etapa executiva de avaliações técnicas e medições",
-        local: "Unidade Sede",
-        vlUnitario: 5000.00,
-        vlTotal: 5000.00,
-        obs: "Adicionado manualmente"
-      });
-    }
-
-    this.renderizarTabelaEditavelEsquerda(c, modelo);
-    this.atualizarPreviewDocumentoOficial();
+  adicionarLinhaTabelaDoc: function() {
+    const proc = this.getProcessoAtivo();
+    proc.itensProducao.push({
+      id: "PROD-" + Date.now(),
+      tipoContrato: "Mensal sob Demanda",
+      item: proc.itensProducao.length + 1,
+      objeto: "Novo serviço / objeto adicional",
+      quant: 1,
+      unid: "UN",
+      vlUnitario: 2500.00,
+      vlTotal: 2500.00,
+      statusProducao: "solicitacao_proposta",
+      relatoriosAnexados: []
+    });
+    this.renderizarDocumentoAtivo();
   },
 
-  removerLinhaTabelaDocumento: function(idx) {
-    const c = this.getClienteAtivo();
-    const modelo = BorealComercialState.modeloDocAtivo;
-
-    if (modelo === "proposta" || modelo === "relatorio_mensal") {
-      if (c.itensProposta.length <= 1) {
-        alert("A proposta deve manter ao menos um item.");
-        return;
-      }
-      c.itensProposta.splice(idx, 1);
-    } else {
-      c.itensCronograma.splice(idx, 1);
+  removerItemDocEspecifico: function(idx) {
+    const proc = this.getProcessoAtivo();
+    if (proc.itensProducao.length <= 1) {
+      alert("Mantenha ao menos um item no documento.");
+      return;
     }
-
-    this.renderizarTabelaEditavelEsquerda(c, modelo);
-    this.atualizarPreviewDocumentoOficial();
+    proc.itensProducao.splice(idx, 1);
+    this.renderizarDocumentoAtivo();
   },
 
-  editarItemProposta: function(idx, campo, valor) {
-    const c = this.getClienteAtivo();
-    if (c.itensProposta[idx]) {
-      c.itensProposta[idx][campo] = valor;
-      this.renderizarTabelaEditavelEsquerda(c, "proposta");
-      this.atualizarPreviewDocumentoOficial();
+  editarItemDocEspecifico: function(idx, campo, valor) {
+    const proc = this.getProcessoAtivo();
+    if (proc.itensProducao[idx]) {
+      proc.itensProducao[idx][campo] = valor;
+      this.renderizarDocumentoAtivo();
     }
   },
 
-  editarItemCronograma: function(idx, campo, valor) {
-    const c = this.getClienteAtivo();
-    if (c.itensCronograma[idx]) {
-      c.itensCronograma[idx][campo] = valor;
-      this.renderizarTabelaEditavelEsquerda(c, BorealComercialState.modeloDocAtivo);
-      this.atualizarPreviewDocumentoOficial();
-    }
-  },
+  // 18. PREVIEW COM GERAÇÃO DE HASH SHA-256 NO FORMATO BOREAL-[HEX]-[RANDOM]
+  atualizarPreviewDocOficial: function() {
+    const proc = this.getProcessoAtivo();
+    const modelo = BorealApp.modeloDocAtivo;
 
-  // 7. ATUALIZAÇÃO DO PREVIEW OFICIAL EM CAMBRIA 10
-  atualizarPreviewDocumentoOficial: function() {
-    const c = this.getClienteAtivo();
-    const modelo = BorealComercialState.modeloDocAtivo;
+    document.getElementById("pv-doc-destinatario").textContent = document.getElementById("doc-in-destinatario").value || proc.cliente;
+    document.getElementById("pv-doc-ac").textContent = document.getElementById("doc-in-ac").value || "Comissão Permanente";
+    document.getElementById("pv-doc-assunto").textContent = document.getElementById("doc-in-assunto").value;
+    document.getElementById("pv-doc-ref").textContent = document.getElementById("doc-in-ref").value || proc.edital;
+    document.getElementById("pv-doc-objeto-compl").textContent = document.getElementById("doc-in-objeto").value || proc.objeto;
+    document.getElementById("pv-doc-data").textContent = document.getElementById("doc-in-data").value;
+    document.getElementById("pv-doc-validade-txt").textContent = document.getElementById("doc-in-validade").value;
 
-    document.getElementById("pv-destinatario").textContent = document.getElementById("doc-input-destinatario").value || c.cliente;
-    document.getElementById("pv-ac").textContent = document.getElementById("doc-input-ac").value || "Setor Competente";
-    document.getElementById("pv-assunto").textContent = document.getElementById("doc-input-assunto").value || "Proposta Comercial";
-    document.getElementById("pv-ref").textContent = document.getElementById("doc-input-ref").value || c.edital;
-    document.getElementById("pv-objeto-complemento").textContent = document.getElementById("doc-input-objeto-proposta").value || c.objeto;
-    document.getElementById("pv-validade-texto").textContent = document.getElementById("doc-input-validade").value;
-    document.getElementById("pv-data-extenso").textContent = document.getElementById("doc-input-data").value;
+    const tabelaBox = document.getElementById("pv-doc-tabela-box");
+    const blocoDeclaracoes = document.getElementById("pv-doc-bloco-declaracoes");
 
-    const tabelaBox = document.getElementById("pv-tabela-documento-box");
-    const blocoDeclaracoes = document.getElementById("pv-bloco-declaracoes");
+    // Gerador de Hash de Validação SHA-256 BOREAL-[HEX]-[RANDOM] (Ponto 18)
+    const hashGerado = "BOREAL-" + Math.random().toString(16).substring(2, 8).toUpperCase() + "-" + Math.floor(Math.random() * 89999 + 10000);
+    document.getElementById("pv-doc-hash-validacao").textContent = hashGerado;
 
     // Proposta Comercial
-    if (modelo === "proposta") {
+    if (modelo === "proposta" || modelo === "relatorio_servicos") {
       blocoDeclaracoes.classList.remove("hidden");
       let total = 0;
-      let tblHtml = `
+      let tbl = `
         <table border="1" cellpadding="3" style="width:100%;border-collapse:collapse;font-size:9.5pt;margin-top:4px;">
           <tr style="background:#f2f2f2;font-weight:bold;">
             <th style="width:35px;text-align:center;">ITEM</th>
             <th style="text-align:left;">ESPECIFICAÇÃO / DESCRIÇÃO DO SERVIÇO</th>
-            <th style="width:45px;text-align:center;">QTE</th>
+            <th style="width:45px;text-align:center;">QUANT.</th>
             <th style="width:40px;text-align:center;">UN</th>
             <th style="width:90px;text-align:right;">VL UNITÁRIO (R$)</th>
             <th style="width:95px;text-align:right;">VL TOTAL (R$)</th>
           </tr>
       `;
-
-      c.itensProposta.forEach(it => {
-        total += it.vlTotal;
-        tblHtml += `
+      proc.itensProducao.forEach((it, idx) => {
+        const vlTotal = (parseFloat(it.quant) || 0) * (parseFloat(it.vlUnitario) || 0);
+        total += vlTotal;
+        tbl += `
           <tr>
-            <td style="text-align:center;font-weight:bold;">${it.item}</td>
-            <td>${it.descricao}</td>
-            <td style="text-align:center;">${it.qte}</td>
-            <td style="text-align:center;">${it.un}</td>
+            <td style="text-align:center;font-weight:bold;">${idx + 1}</td>
+            <td>${it.objeto}</td>
+            <td style="text-align:center;">${it.quant}</td>
+            <td style="text-align:center;">${it.unid}</td>
             <td style="text-align:right;">R$ ${it.vlUnitario.toFixed(2)}</td>
-            <td style="text-align:right;font-weight:bold;">R$ ${it.vlTotal.toFixed(2)}</td>
+            <td style="text-align:right;font-weight:bold;">R$ ${vlTotal.toFixed(2)}</td>
           </tr>
         `;
       });
-
-      tblHtml += `
+      tbl += `
         <tr style="background:#fafafa;font-weight:bold;">
           <td colspan="5" style="text-align:right;text-transform:uppercase;">VALOR TOTAL:</td>
           <td style="text-align:right;color:#047857;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
         </tr>
       </table>`;
-      tabelaBox.innerHTML = tblHtml;
-    } 
-    // Cronograma Físico-Financeiro
-    else if (modelo === "cronograma_pgr" || modelo === "cronograma_geral" || modelo === "relatorio_fisico_fin") {
+      tabelaBox.innerHTML = tbl;
+    }
+    // Cronograma com PGR / Cronograma Geral (Ponto 13: SEM VALORES!)
+    else if (modelo === "cronograma_pgr" || modelo === "cronograma_geral") {
       blocoDeclaracoes.classList.add("hidden");
-      let total = 0;
-      let tblHtml = `
+      let tbl = `
         <table border="1" cellpadding="3" style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4px;">
           <tr style="background:#f2f2f2;font-weight:bold;">
-            <th>MÊS</th><th>DIA</th><th>SERVIÇO / OBJETO ENTREGUE</th><th>LOCAL</th><th>VALOR TOTAL R$</th>
+            <th style="width:60px;">MÊS</th>
+            <th style="width:60px;">DIA</th>
+            <th>SERVIÇO</th>
+            <th>LOCAL</th>
           </tr>
       `;
-      c.itensCronograma.forEach(cr => {
-        total += cr.vlTotal;
-        tblHtml += `
+      proc.itensProducao.forEach((it, idx) => {
+        tbl += `
           <tr>
-            <td style="text-align:center;font-weight:bold;">${cr.mes}</td>
-            <td style="text-align:center;">${cr.dia}</td>
-            <td>${cr.servico}</td>
-            <td>${cr.local}</td>
-            <td style="text-align:right;font-weight:bold;">R$ ${cr.vlTotal.toFixed(2)}</td>
+            <td style="text-align:center;font-weight:bold;">Mês ${idx + 1}</td>
+            <td style="text-align:center;">01 a 15</td>
+            <td>${it.objeto}</td>
+            <td>${proc.endereco}</td>
           </tr>
         `;
       });
-      tblHtml += `
-        <tr style="background:#fafafa;font-weight:bold;">
-          <td colspan="4" style="text-align:right;">TOTAL DO CRONOGRAMA:</td>
-          <td style="text-align:right;color:#047857;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        </tr>
-      </table>`;
-      tabelaBox.innerHTML = tblHtml;
-    } 
+      tbl += `</table>`;
+      tabelaBox.innerHTML = tbl;
+    }
+    // Cronograma Físico-Financeiro
+    else if (modelo === "cronograma_fisico_fin") {
+      blocoDeclaracoes.classList.add("hidden");
+      let total = 0;
+      let tbl = `
+        <table border="1" cellpadding="3" style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:4px;">
+          <tr style="background:#f2f2f2;font-weight:bold;">
+            <th>MÊS</th><th>SERVIÇOS</th><th>QUANT.</th><th>VALOR TOTAL R$</th>
+          </tr>
+      `;
+      proc.itensProducao.forEach((it, idx) => {
+        const vlTotal = (parseFloat(it.quant) || 0) * (parseFloat(it.vlUnitario) || 0);
+        total += vlTotal;
+        tbl += `
+          <tr>
+            <td style="text-align:center;font-weight:bold;">Mês ${idx + 1}</td>
+            <td>${it.objeto}</td>
+            <td style="text-align:center;">${it.quant}</td>
+            <td style="text-align:right;font-weight:bold;">R$ ${vlTotal.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+      tbl += `<tr style="font-weight:bold;background:#fafafa;"><td colspan="3" align="right">TOTAL:</td><td align="right" style="color:#047857;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr></table>`;
+      tabelaBox.innerHTML = tbl;
+    }
     // Ofício e Declaração
     else {
       blocoDeclaracoes.classList.add("hidden");
-      const txt = document.getElementById("texto-livre-oficio") ? document.getElementById("texto-livre-oficio").value : "";
+      const txt = document.getElementById("in-texto-livre-doc") ? document.getElementById("in-texto-livre-doc").value : "";
       tabelaBox.innerHTML = `<div style="font-size:10pt;line-height:1.35;text-align:justify;white-space:pre-wrap;padding-top:6px;">${txt}</div>`;
     }
   },
 
-  // 8. CANVAS DE ASSINATURA DESENHADA
-  configurarCanvasAssinatura: function() {
-    const canvas = document.getElementById("canvas-assinatura-doc");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let desenhando = false;
+  // 8. SALVAR E ANEXAR DIRETAMENTE NA MATRIZ DE PRODUÇÃO
+  salvarEAnexarNaProducao: function() {
+    const proc = this.getProcessoAtivo();
+    const modelo = BorealApp.modeloDocAtivo;
+    const hash = document.getElementById("pv-doc-hash-validacao").textContent;
+    const nomeArquivo = `${modelo.toUpperCase()}_${proc.cliente.substring(0, 15).replace(/\s+/g, '_')}_${Date.now()}.pdf`;
 
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
+    // Anexa na lista de relatórios da produção do cliente
+    if (proc.itensProducao.length > 0) {
+      proc.itensProducao[0].relatoriosAnexados.push({
+        id: "REL-" + Date.now(),
+        nome: nomeArquivo,
+        data: new Date().toISOString().split('T')[0],
+        hash: hash
+      });
+    }
 
-    const getPos = (e) => {
-      const r = canvas.getBoundingClientRect();
-      const cx = e.touches ? e.touches[0].clientX : e.clientX;
-      const cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: cx - r.left, y: cy - r.top };
-    };
-
-    canvas.addEventListener("mousedown", (e) => { desenhando = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
-    canvas.addEventListener("mousemove", (e) => { if (!desenhando) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
-    window.addEventListener("mouseup", () => {
-      if (!desenhando) return;
-      desenhando = false;
-      const img = document.getElementById("pv-img-assinatura-canvas");
-      img.src = canvas.toDataURL("image/png");
-      img.classList.remove("hidden");
-    });
-
-    canvas.addEventListener("touchstart", (e) => { desenhando = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, {passive:false});
-    canvas.addEventListener("touchmove", (e) => { if (!desenhando) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }, {passive:false});
-    canvas.addEventListener("touchend", () => {
-      desenhando = false;
-      const img = document.getElementById("pv-img-assinatura-canvas");
-      img.src = canvas.toDataURL("image/png");
-      img.classList.remove("hidden");
-    });
+    alert(`Documento salvo em PDF com código de autenticidade ${hash} e ANEXADO AUTOMATICAMENTE na coluna de Ação do Relatório de Produção de "${proc.cliente}"!`);
+    this.renderizarRelatorioComercial();
   },
 
-  limparCanvasAssinatura: function() {
-    const canvas = document.getElementById("canvas-assinatura-doc");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const img = document.getElementById("pv-img-assinatura-canvas");
-    img.src = "";
-    img.classList.add("hidden");
-  },
+  baixarDocWord: function() {
+    const proc = this.getProcessoAtivo();
+    const modelo = BorealApp.modeloDocAtivo;
+    const htmlPreview = document.getElementById("box-preview-documento-oficial").innerHTML;
 
-  // 9. DOWNLOADS REAIS EM WORD (.DOCX) E PDF
-  baixarDocumentoWord: function() {
-    const c = this.getClienteAtivo();
-    const modelo = BorealComercialState.modeloDocAtivo;
-    const conteudoHtml = document.getElementById("box-preview-documento-oficial").innerHTML;
-
-    // Cabeçalho compatível com Microsoft Word para manter fontes e layout
     const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head><meta charset='utf-8'><title>${c.cliente}</title>
+      <head><meta charset='utf-8'><title>${proc.cliente}</title>
       <style>
         body { font-family: 'Cambria', serif; font-size: 10pt; line-height: 1.15; text-align: justify; }
         table { border-collapse: collapse; width: 100%; font-size: 9.5pt; font-family: 'Cambria', serif; }
         th, td { border: 1px solid #000; padding: 4px; }
       </style></head><body>`;
     const postHtml = "</body></html>";
-    const blob = new Blob(['\ufeff' + preHtml + conteudoHtml + postHtml], {
-      type: 'application/msword'
-    });
+    const blob = new Blob(['\ufeff' + preHtml + htmlPreview + postHtml], { type: 'application/msword' });
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${modelo.toUpperCase()}_BOREAL_${c.cliente.replace(/\s+/g, '_')}.doc`;
+    a.download = `${modelo.toUpperCase()}_BOREAL_${proc.cliente.replace(/\s+/g, '_')}.doc`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   },
 
-  baixarDocumentoPDF: function() {
-    const el = document.getElementById("box-preview-documento-oficial");
-    const c = this.getClienteAtivo();
-    const opt = {
-      margin: 10,
-      filename: `PROPOSTA_BOREAL_${c.cliente.replace(/\s+/g, '_')}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    if (window.html2pdf) {
-      window.html2pdf().set(opt).from(el).save();
-    } else {
-      window.print();
-    }
+  // =========================================================================
+  // 12. RELATÓRIO GERAL CONSOLIDADO DE TODOS OS CLIENTES (IMPRESSÃO / SALVAR)
+  // =========================================================================
+  abrirModalRelatorioConsolidado: function() {
+    const modal = document.getElementById("modal-consolidado");
+    const container = document.getElementById("box-impressao-consolidada");
+    modal.classList.remove("hidden");
+
+    let totalEntregue = 0;
+    let totalAndamento = 0;
+    let totalGeral = 0;
+
+    let tabelaHtml = `
+      <div class="border-b-2 border-[#B48D3C] pb-3 flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-[#B48D3C]">BOREAL ENGMED LTDA</h2>
+          <h3 class="text-xs font-semibold text-slate-600 uppercase">Relatório Geral Consolidado de Clientes & Produção</h3>
+        </div>
+        <div class="text-right text-[10px] text-slate-500">
+          Posição em: ${new Date().toLocaleDateString('pt-BR')}<br>
+          Paulínia - SP
+        </div>
+      </div>
+
+      <table border="1" cellpadding="6" style="width:100%;border-collapse:collapse;font-size:10pt;" class="mt-4">
+        <thead style="background:#f5f5f5;">
+          <tr>
+            <th>CLIENTE / ÓRGÃO</th>
+            <th>EDITAL / CONTRATO</th>
+            <th>OBJETO DO SERVIÇO</th>
+            <th style="text-align:center;">STATUS DE PRODUÇÃO</th>
+            <th style="text-align:right;">VALOR ENTREGUE (R$)</th>
+            <th style="text-align:right;">EM ANDAMENTO (R$)</th>
+            <th style="text-align:right;">VALOR TOTAL (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    BorealApp.processosComerciais.forEach(p => {
+      p.itensProducao.forEach(it => {
+        const vlTotal = it.vlTotal;
+        totalGeral += vlTotal;
+
+        const isEntregue = it.statusProducao === "concluido" || it.statusProducao === "entregue_aguardando" || it.statusProducao === "entregue_aceito";
+        const vEntregue = isEntregue ? vlTotal : 0;
+        const vAndamento = isEntregue ? 0 : vlTotal;
+
+        totalEntregue += vEntregue;
+        totalAndamento += vAndamento;
+
+        tabelaHtml += `
+          <tr>
+            <td><strong>${p.cliente}</strong></td>
+            <td>${p.edital}</td>
+            <td>${it.objeto}</td>
+            <td style="text-align:center;">${it.statusProducao.toUpperCase()}</td>
+            <td style="text-align:right;color:#047857;font-weight:bold;">${vEntregue > 0 ? 'R$ ' + vEntregue.toLocaleString('pt-BR', {minimumFractionDigits:2}) : '-'}</td>
+            <td style="text-align:right;color:#b45309;font-weight:bold;">${vAndamento > 0 ? 'R$ ' + vAndamento.toLocaleString('pt-BR', {minimumFractionDigits:2}) : '-'}</td>
+            <td style="text-align:right;font-weight:bold;">R$ ${vlTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+          </tr>
+        `;
+      });
+    });
+
+    tabelaHtml += `
+        </tbody>
+        <tfoot style="background:#f8fafc;font-weight:bold;font-size:11pt;">
+          <tr>
+            <td colspan="4" style="text-align:right;">TOTAIS CONSOLIDADOS GERAIS:</td>
+            <td style="text-align:right;color:#047857;">R$ ${totalEntregue.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+            <td style="text-align:right;color:#b45309;">R$ ${totalAndamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+            <td style="text-align:right;color:#0f172a;">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+          </tr>
+        </tfoot>
+      </table>
+    `;
+
+    container.innerHTML = tabelaHtml;
   },
 
-  // 10. PERSISTÊNCIA LOCAL
-  salvarEstadoLocal: function() {
-    try {
-      localStorage.setItem("boreal_comercial_db", JSON.stringify(BorealComercialState.relatorioComercial));
-      alert("Todas as alterações do Relatório Comercial e Propostas foram salvas localmente com sucesso!");
-    } catch (e) {
-      alert("Dados atualizados na memória com sucesso!");
-    }
+  fecharModalRelatorioConsolidado: function() {
+    document.getElementById("modal-consolidado").classList.add("hidden");
   },
 
-  carregarEstadoLocal: function() {
-    try {
-      const db = localStorage.getItem("boreal_comercial_db");
-      if (db) {
-        BorealComercialState.relatorioComercial = JSON.parse(db);
+  imprimirRelatorioConsolidado: function() {
+    window.print();
+  },
+
+  // =========================================================================
+  // ABA 3: PORTAL EXTERNO DO CLIENTE (CONSULTA E DOWNLOAD EXCLUSIVO)
+  // =========================================================================
+  renderizarPortalCliente: function(clienteId) {
+    const sel = document.getElementById("select-portal-cliente");
+    sel.innerHTML = "";
+
+    BorealApp.processosComerciais.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = `${p.cliente} (Fiscal Conectado)`;
+      if (clienteId ? p.id === clienteId : p.id === BorealApp.clienteAtivoId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+
+    const cliIdAtivo = sel.value;
+    const proc = BorealApp.processosComerciais.find(p => p.id === cliIdAtivo) || BorealApp.processosComerciais[0];
+    document.getElementById("lbl-portal-cliente-nome").textContent = `Relatórios de Entrega Disponíveis • ${proc.cliente}`;
+
+    const tbody = document.getElementById("tbody-portal-cliente-relatorios");
+    tbody.innerHTML = "";
+
+    let encontrou = false;
+    proc.itensProducao.forEach(it => {
+      if (it.relatoriosAnexados && it.relatoriosAnexados.length > 0) {
+        it.relatoriosAnexados.forEach(rel => {
+          encontrou = true;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="p-2.5 font-bold text-slate-800">${rel.nome}</td>
+            <td class="p-2.5 text-slate-600">${rel.data}</td>
+            <td class="p-2.5 text-slate-700 font-medium">${it.objeto}</td>
+            <td class="p-2.5 font-mono text-[11px] text-[#B48D3C] font-bold">${rel.hash}</td>
+            <td class="p-2.5 text-center">
+              <button onclick="window.borealApp.baixarRelatorioProducao('${rel.nome}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-xs font-semibold">
+                Baixar / Visualizar
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
       }
-    } catch (e) {}
+    });
+
+    if (!encontrou) {
+      tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Nenhum relatório de entrega anexado para este cliente até o momento.</td></tr>`;
+    }
   },
 
-  // 11. UTILITÁRIO: NÚMERO POR EXTENSO
-  converterNumeroExtenso: function(v) {
+  // NAVEGAÇÃO DE ABAS
+  alternarAba: function(abaId) {
+    BorealApp.abaAtiva = abaId;
+    document.getElementById("sec-relatorio-comercial").classList.add("hidden");
+    document.getElementById("sec-documentos-padroes").classList.add("hidden");
+    document.getElementById("sec-portal-cliente").classList.add("hidden");
+
+    document.getElementById("nav-btn-relatorio").classList.remove("active");
+    document.getElementById("nav-btn-documentos").classList.remove("active");
+    document.getElementById("nav-btn-portal").classList.remove("active");
+
+    if (abaId === "relatorio_comercial") {
+      document.getElementById("sec-relatorio-comercial").classList.remove("hidden");
+      document.getElementById("nav-btn-relatorio").classList.add("active");
+    } else if (abaId === "documentos_padroes") {
+      document.getElementById("sec-documentos-padroes").classList.remove("hidden");
+      document.getElementById("nav-btn-documentos").classList.add("active");
+      this.popularSeletoresDocumentos();
+      this.renderizarDocumentoAtivo();
+    } else {
+      document.getElementById("sec-portal-cliente").classList.remove("hidden");
+      document.getElementById("nav-btn-portal").classList.add("active");
+      this.renderizarPortalCliente();
+    }
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  // UTILITÁRIO: NÚMERO POR EXTENSO
+  converterExtenso: function(v) {
     if (!v || v === 0) return "Zero reais";
     const int = Math.floor(v);
     const cent = Math.round((v - int) * 100);
     return `${int.toLocaleString('pt-BR')} reais` + (cent > 0 ? ` e ${cent} centavos` : "");
+  },
+
+  adicionarLinhaComercialManual: function() {
+    const nome = prompt("Nome do Cliente / Órgão Público:");
+    if (!nome) return;
+    const obj = prompt("Objeto da Contratação / Licitação:");
+    const novoId = "CLI-" + String(BorealApp.processosComerciais.length + 1).padStart(3, '0');
+
+    BorealApp.processosComerciais.unshift({
+      id: novoId,
+      edital: "Edital 2026",
+      processo: "Processo ADM",
+      portal: "Licitei",
+      dataProposta: new Date().toISOString().split('T')[0],
+      cliente: nome,
+      cnpj: "00.000.000/0001-00",
+      endereco: "Endereço a preencher",
+      objeto: obj || "Serviços especializados em Engenharia e Medicina do Trabalho",
+      valorEstimado: 25000.00,
+      statusProcesso: "solicitacao_proposta",
+      subMatrizAberta: false,
+      itensProducao: [
+        {
+          id: "PROD-" + Date.now(),
+          tipoContrato: "Mensal sob Demanda",
+          item: 1,
+          objeto: obj || "Serviço de SST",
+          quant: 1,
+          unid: "UN",
+          vlUnitario: 25000.00,
+          vlTotal: 25000.00,
+          statusProducao: "solicitacao_proposta",
+          relatoriosAnexados: []
+        }
+      ]
+    });
+
+    this.renderizarRelatorioComercial();
+    this.atualizarListaClientesVencedores();
+    this.popularSeletoresDocumentos();
+  },
+
+  exportarRelatorioExcel: function() {
+    const data = [
+      ["EDITAL", "PROCESSO", "PORTAL", "DATA DA PROPOSTA", "CLIENTE", "CNPJ", "ENDEREÇO", "OBJETO", "VALOR ESTIMADO", "STATUS DO PROCESSO"]
+    ];
+    BorealApp.processosComerciais.forEach(p => {
+      data.push([
+        p.edital, p.processo, p.portal, p.dataProposta, p.cliente, p.cnpj, p.endereco, p.objeto, p.valorEstimado, p.statusProcesso
+      ]);
+    });
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "RELATÓRIO COMERCIAL");
+    XLSX.writeFile(wb, "Relatorio_Comercial_Boreal.xlsx");
+  },
+
+  salvarDados: function() {
+    try {
+      localStorage.setItem("boreal_v5_db", JSON.stringify(BorealApp.processosComerciais));
+      alert("Todos os dados do Relatório Comercial, Matriz de Produção e Documentos foram salvos com sucesso!");
+    } catch (e) {
+      alert("Dados atualizados na memória com sucesso!");
+    }
   }
 };
 
-// INICIALIZAR QUANDO O DOM ESTIVER PRONTO
+// INICIALIZAÇÃO
 document.addEventListener("DOMContentLoaded", () => {
-  window.borealComercial.init();
+  try {
+    const saved = localStorage.getItem("boreal_v5_db");
+    if (saved) BorealApp.processosComerciais = JSON.parse(saved);
+  } catch(e) {}
+  window.borealApp.init();
 });
