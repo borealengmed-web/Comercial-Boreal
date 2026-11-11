@@ -1,7 +1,12 @@
+
 /**
  * BOREAL ENGMED - SISTEMA INTEGRADO COMERCIAL, CONTRATOS, PRODUÇÃO & DOCUMENTOS
  * Versão 7.0 - Atendimento Integral aos Requisitos com Separação de Módulos e Download Real
  */
+
+// 1. CONFIGURAÇÃO DE ACESSO AO BANCO DE DADOS SUPABASE
+const SUPABASE_URL = "https://mtcvqkxawanntplbykes.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_aNhbmNlgsg_gVkBHlZxutA_UfNh-EvH";
 
 const BorealApp = {
   abaAtiva: "relatorio_comercial",
@@ -9,9 +14,7 @@ const BorealApp = {
   modeloDocAtivo: "proposta",
   linkRadarEditais: "https://app.licitei.com.br/dashboard/radar-de-licitacoes?filterId=%229417%22&date=20260529%3B20260529&periodType=publication&page=0&orderBy=relevant&showSeen=false&edit=false&triagem=false",
   perfilAtivo: "gestor", // 'gestor', 'agente', 'cliente'
-  campoAudioFocadoId: "ct-objeto", // Campo que recebe áudio sequencialmente
-
-  // =========================================================================
+  campoAudioFocadoId: "ct-objeto", // Campo que recebe áudio sequencialmente  // =========================================================================
   // 1. RELATÓRIO COMERCIAL (MATRIZ ISOLADA - PONTO 4, 5, 6)
   // Colunas: CLIENTE, EDITAL, PROCESSO, PORTAL, DATA DA PROPOSTA, OBJETO, VALOR ESTIMADO (R$), STATUS DO PROCESSO, EDITAIS ANEXADOS (ATÉ 10), PROPOSTA, AÇÃO
   // =========================================================================
