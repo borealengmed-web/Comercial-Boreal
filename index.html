@@ -3,18 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Boreal ENGMED - Gestão Comercial, Produção & Documentos Oficiais</title>
-  
+  <title>Sistema Boreal ENGMED - Comercial, Contratos & Produção</title>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- SheetJS para ler/exportar Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- html2pdf.js para exportar PDF idêntico -->
+  <!-- html2pdf.js para exportar PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- PDF.js para leitura real de arquivos PDF no navegador -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
 
-  <!-- Google Fonts: Inter e Cambria -->
+  <!-- Fontes Google -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,7 +44,7 @@
       width: 100%;
       border: 1px solid transparent;
       background: transparent;
-      padding: 3px 5px;
+      padding: 3px 6px;
       font-size: 11px;
       border-radius: 4px;
       transition: all 0.15s;
@@ -52,7 +59,25 @@
       outline: none;
       box-shadow: 0 0 0 2px rgba(180, 141, 60, 0.2);
     }
-    /* Estilo para impressão do relatório consolidado */
+    /* Classe para ocultar valores e propostas no perfil Agente */
+    body.perfil-agente .sigilo-valor {
+      display: none !important;
+    }
+    body.perfil-agente .sigilo-texto-bloqueado {
+      filter: blur(4px);
+      user-select: none;
+      pointer-events: none;
+    }
+    @keyframes pulse-gold {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+    .mic-active {
+      animation: pulse-gold 1.2s infinite ease-in-out;
+      background-color: #fef3c7 !important;
+      border-color: #b48d3c !important;
+      color: #b48d3c !important;
+    }
     @media print {
       body * { visibility: hidden; }
       #box-impressao-consolidada, #box-impressao-consolidada * { visibility: visible; }
@@ -62,7 +87,40 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- CABEÇALHO SUPERIOR -->
+  <!-- ========================================================================= -->
+  <!-- BARRA DE AUTENTICAÇÃO / LOGIN & CONTROLE DE PERFIL (COM LEMBRAR SENHA)   -->
+  <!-- ========================================================================= -->
+  <div class="bg-slate-900 text-slate-200 text-xs px-4 py-2 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center space-x-2">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+      <span class="font-semibold text-slate-300">Acesso Seguro Boreal:</span>
+      <span id="lbl-usuario-conectado" class="font-bold text-[#B48D3C]">gestor@boreal.eng.br (Gestor)</span>
+    </div>
+
+    <!-- CONTROLES DE LOGIN RÁPIDO E ALTERAÇÃO DE PERFIL COM SENHA SALVA -->
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-1.5">
+        <label for="select-perfil-sistema" class="text-slate-400">Perfil:</label>
+        <select id="select-perfil-sistema" onchange="window.borealApp.alternarPerfilAcesso(this.value)" class="bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1 text-slate-200 focus:ring-[#B48D3C]">
+          <option value="gestor">Gestor Geral (Acesso Total)</option>
+          <option value="agente">Agente de Operação (Sigilo de Valores)</option>
+          <option value="cliente">Cliente / Fiscal (Acesso Restrito)</option>
+        </select>
+      </div>
+
+      <button onclick="window.borealApp.abrirModalLogin()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 flex items-center space-x-1 transition">
+        <i data-lucide="key" class="w-3.5 h-3.5 text-[#B48D3C]"></i>
+        <span>Definir / Trocar Senha</span>
+      </button>
+
+      <button onclick="window.borealApp.deslogarUsuario()" class="text-rose-400 hover:text-rose-300 flex items-center space-x-1">
+        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        <span>Sair</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- CABEÇALHO PRINCIPAL -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-[1750px] mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
       
@@ -77,28 +135,28 @@
         </div>
         <span class="hidden md:inline-block h-6 w-px bg-slate-300 mx-2"></span>
         <span class="hidden lg:inline-block text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          Módulo Comercial • Relatório Comercial & Produção • Documentos Padrões
+          ERP Corporativo • Comercial • Contratos • Produção • Documentos
         </span>
       </div>
 
-      <!-- BUSCA RÁPIDA / SELEÇÃO DE CLIENTES VENCEDORES E CONTRATOS -->
+      <!-- BUSCA DE CLIENTES NA BARRA SUPERIOR (PONTO 3: APENAS 'CLIENTES') -->
       <div class="flex items-center space-x-3">
         <div class="flex items-center space-x-1.5 bg-amber-50/70 border border-amber-300 rounded-lg p-1.5">
-          <i data-lucide="award" class="w-4 h-4 text-[#B48D3C]"></i>
-          <label for="select-cliente-vencedor-header" class="text-xs font-bold text-slate-700 uppercase hidden sm:inline">
-            Clientes Vencedores:
+          <i data-lucide="users" class="w-4 h-4 text-[#B48D3C]"></i>
+          <label for="select-global-busca-cliente" class="text-xs font-bold text-slate-700 uppercase hidden sm:inline">
+            CLIENTES:
           </label>
-          <select id="select-cliente-vencedor-header" onchange="window.borealApp.irParaClienteRelatorio(this.value)" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:ring-0 p-0 max-w-xs md:max-w-sm truncate">
-            <!-- Populado dinamicamente com clientes vencedores -->
+          <select id="select-global-busca-cliente" onchange="window.borealApp.navegarParaCliente(this.value)" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:ring-0 p-0 max-w-xs md:max-w-sm truncate">
+            <!-- Populado dinamicamente com todos os clientes registrados -->
           </select>
         </div>
 
-        <button onclick="window.borealApp.abrirModalRelatorioConsolidado()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition" title="Relatório Geral Consolidado de Todos os Clientes">
+        <button onclick="window.borealApp.abrirModalRelatorioConsolidado()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition" title="Relatório Consolidado de Clientes e Valores">
           <i data-lucide="printer" class="w-3.5 h-3.5 text-[#B48D3C]"></i>
-          <span>Relatório Geral Consolidado</span>
+          <span>Relatório Consolidado</span>
         </button>
 
-        <button onclick="window.borealApp.salvarDados()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition">
+        <button onclick="window.borealApp.salvarDadosGlobal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition">
           <i data-lucide="save" class="w-3.5 h-3.5"></i>
           <span>Salvar</span>
         </button>
@@ -106,53 +164,63 @@
 
     </div>
 
-    <!-- NAVEGAÇÃO DE ABAS PRINCIPAIS -->
-    <nav class="max-w-[1750px] mx-auto px-4 sm:px-6 flex space-x-2 border-t border-slate-100 text-xs font-semibold">
-      <button onclick="window.borealApp.alternarAba('relatorio_comercial')" class="tab-nav active px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2" id="nav-btn-relatorio">
+    <!-- NAVEGAÇÃO ENTRE OS MÓDULOS SEPARADOS (PONTO 5, 7, 8) -->
+    <nav class="max-w-[1750px] mx-auto px-4 sm:px-6 flex space-x-1 overflow-x-auto border-t border-slate-100 text-xs font-semibold">
+      <button onclick="window.borealApp.abrirModulo('relatorio_comercial')" class="tab-nav active px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" id="tab-nav-relatorio">
         <i data-lucide="layout-grid" class="w-4 h-4 text-[#B48D3C]"></i>
-        <span>1. Relatório Comercial & Matriz de Produção</span>
+        <span>1. Relatório Comercial</span>
       </button>
 
-      <button onclick="window.borealApp.alternarAba('documentos_padroes')" class="tab-nav px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2" id="nav-btn-documentos">
+      <button onclick="window.borealApp.abrirModulo('modulo_contratos')" class="tab-nav px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" id="tab-nav-contratos">
+        <i data-lucide="file-check" class="w-4 h-4 text-[#B48D3C]"></i>
+        <span>2. Contratos</span>
+      </button>
+
+      <button onclick="window.borealApp.abrirModulo('relatorio_producao')" class="tab-nav px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" id="tab-nav-producao">
+        <i data-lucide="hard-hat" class="w-4 h-4 text-[#B48D3C]"></i>
+        <span>3. Relatório de Produção</span>
+      </button>
+
+      <button onclick="window.borealApp.abrirModulo('documentos_padroes')" class="tab-nav px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap sigilo-valor" id="tab-nav-documentos">
         <i data-lucide="file-text" class="w-4 h-4 text-[#B48D3C]"></i>
-        <span>2. Documentos Padrões (Propostas, Relatórios de Serviços e Cronogramas)</span>
+        <span>4. Documentos Padrões</span>
       </button>
 
-      <button onclick="window.borealApp.alternarAba('portal_cliente')" class="tab-nav px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2" id="nav-btn-portal">
+      <button onclick="window.borealApp.abrirModulo('portal_cliente')" class="tab-nav px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" id="tab-nav-portal">
         <i data-lucide="external-link" class="w-4 h-4 text-[#B48D3C]"></i>
-        <span>3. Acesso Externo do Cliente (Consulta de Relatórios de Entrega)</span>
+        <span>5. Acesso Externo do Cliente</span>
       </button>
     </nav>
   </header>
 
-  <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+  <!-- CORPO PRINCIPAL -->
   <main class="flex-1 max-w-[1750px] w-full mx-auto p-4 sm:p-6 space-y-6">
 
     <!-- ========================================================================= -->
-    <!-- ABA 1: RELATÓRIO COMERCIAL & PRODUÇÃO (CONFORME NOVO MODELO)               -->
+    <!-- MÓDULO 1: RELATÓRIO COMERCIAL (MATRIZ ISOLADA E SEQUENCIAL)               -->
     <!-- ========================================================================= -->
     <section id="sec-relatorio-comercial" class="space-y-6">
 
-      <!-- PAINEL SUPERIOR: 1) RADAR DE EDITAIS COM LINK CONFIGURÁVEL | 2) ANEXAÇÃO DE EDITAIS -->
+      <!-- PAINEL SUPERIOR: RADAR EXTERNO EDITÁVEL + ANEXAÇÃO DE EDITAIS COM PDF.JS -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
-        <!-- CARD 1: LINK EXTERNO CONFIGURÁVEL PARA O RADAR DE LICITAÇÕES (LICITEI OU OUTRO) -->
+        <!-- CARD 1: RADAR DE EDITAIS COM LINK CONFIGURÁVEL -->
         <div class="lg:col-span-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <div class="flex items-center space-x-2">
               <i data-lucide="radar" class="w-4 h-4 text-[#B48D3C]"></i>
               <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                Portal de Captação Externa de Editais (Radar de Licitações)
+                Portal de Captação Externa de Editais (Radar Licitei)
               </h2>
             </div>
-            <button onclick="window.borealApp.editarLinkCapitacao()" class="text-xs text-[#B48D3C] hover:underline flex items-center space-x-1">
+            <button onclick="window.borealApp.editarLinkCapitacao()" class="text-xs text-[#B48D3C] hover:underline font-semibold flex items-center space-x-1">
               <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
               <span>Alterar Link</span>
             </button>
           </div>
 
           <p class="text-xs text-slate-500">
-            Acesse diretamente o portal de editais configurado (Licitei ou similar). Você pode alterar a URL a qualquer momento conforme a ferramenta em uso.
+            Acesse diretamente o radar configurado. O link pode ser alterado a qualquer momento sem reiniciar o sistema.
           </p>
 
           <div class="flex items-center space-x-2 pt-1">
@@ -164,45 +232,44 @@
           </div>
         </div>
 
-        <!-- CARD 2: ANEXAÇÃO DE EDITAIS E TERMO DE REFERÊNCIA (EXTRAÇÃO IA) -->
+        <!-- CARD 2: ANEXAÇÃO DO EDITAL / TR COM LEITURA REAL VIA PDF.JS -->
         <div class="lg:col-span-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <div class="flex items-center space-x-2">
               <i data-lucide="file-up" class="w-4 h-4 text-[#B48D3C]"></i>
               <h2 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                Anexação de Documentos (Edital / TR / Projeto Básico)
+                Anexação de Editais / TR (Leitura Real com Extração Inteligente)
               </h2>
             </div>
-            <span class="text-[11px] text-slate-400">Extração Automática dos Campos</span>
+            <span class="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              PDF.js Ativo
+            </span>
           </div>
 
           <p class="text-xs text-slate-500">
-            Anexe o Edital ou TR baixado do portal de licitações. O sistema extrai e posiciona Cliente, CNPJ, Endereço, Objeto e Valor Estimado na Matriz Comercial.
+            Arraste ou anexe o edital em PDF baixado do radar. O sistema extrai Órgão, Processo, Edital, Objeto, Valor Estimado e Itens na hora.
           </p>
 
           <div class="border-2 border-dashed border-slate-300 hover:border-[#B48D3C] rounded-xl p-3 text-center cursor-pointer transition bg-slate-50 hover:bg-amber-50/30 relative">
-            <input type="file" id="input-upload-edital" accept=".pdf, .docx, .doc, .txt, .xlsx" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="window.borealApp.processarUploadEdital(this)">
+            <input type="file" id="input-upload-edital" accept=".pdf, .docx, .doc, .txt, .xlsx" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onchange="window.borealApp.processarUploadEditalReal(this)">
             <div class="flex items-center justify-center space-x-2 text-xs font-semibold text-slate-700">
               <i data-lucide="upload" class="w-4 h-4 text-[#B48D3C]"></i>
-              <span>Clique aqui para anexar Edital/TR ou arraste o arquivo</span>
+              <span id="label-upload-status">Clique para anexar Edital/TR ou arraste o arquivo aqui</span>
             </div>
           </div>
         </div>
 
       </div>
 
-      <!-- ======================================================================= -->
-      <!-- MATRIZ 1: RELATÓRIO COMERCIAL (TABELA 0 EXATA DO DOCUMENTO)             -->
-      <!-- ======================================================================= -->
+      <!-- MATRIZ DO RELATÓRIO COMERCIAL (PONTOS 4, 5, 6: LINHAS SEQUENCIAIS, SEM CNPJ/ENDEREÇO) -->
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
           <div>
             <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">
-              RELATÓRIO COMERCIAL
+              MATRIZ DO RELATÓRIO COMERCIAL
             </h2>
             <p class="text-xs text-slate-500">
-              Processos em andamento. Ao definir qualquer status de VENCEDOR, a tecla <strong>ITENS</strong> é habilitada para gerenciar a Matriz de Produção.
+              Cada linha corresponde a um cliente/licitação em sequência. Anexe até 10 editais/documentos por processo e consulte a proposta vinculada.
             </p>
           </div>
 
@@ -218,27 +285,346 @@
           </div>
         </div>
 
-        <!-- TABELA COMERCIAL -->
         <div class="overflow-x-auto border border-slate-200 rounded-lg">
           <table class="w-full text-xs text-left whitespace-nowrap">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
               <tr>
+                <th class="p-2 border-r min-w-[200px]">CLIENTE</th>
                 <th class="p-2 border-r w-28">EDITAL</th>
                 <th class="p-2 border-r w-28">PROCESSO</th>
                 <th class="p-2 border-r w-20">PORTAL</th>
                 <th class="p-2 border-r w-28">DATA DA PROPOSTA</th>
-                <th class="p-2 border-r min-w-[200px]">CLIENTE</th>
-                <th class="p-2 border-r w-36">CNPJ</th>
-                <th class="p-2 border-r min-w-[220px]">ENDEREÇO</th>
-                <th class="p-2 border-r min-w-[240px]">OBJETO</th>
-                <th class="p-2 border-r w-32 text-right">VALOR ESTIMADO (R$)</th>
+                <th class="p-2 border-r min-w-[260px]">OBJETO</th>
+                <th class="p-2 border-r w-32 text-right sigilo-valor">VALOR ESTIMADO (R$)</th>
                 <th class="p-2 border-r min-w-[220px]">STATUS DO PROCESSO</th>
-                <th class="p-2 text-center w-28">AÇÃO</th>
+                <th class="p-2 border-r min-w-[180px]">EDITAIS / DOCS ANEXADOS (ATÉ 10)</th>
+                <th class="p-2 border-r w-28 text-center sigilo-valor">PROPOSTA</th>
+                <th class="p-2 text-center w-16">AÇÃO</th>
               </tr>
             </thead>
             <tbody id="tbody-relatorio-comercial" class="divide-y divide-slate-100 bg-white">
-              <!-- Linhas geradas dinamicamente com suporte à sub-matriz de produção -->
+              <!-- Linhas sequenciais uma embaixo da outra -->
             </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MÓDULO 2: CONTRATOS (NOVO MÓDULO SEPARADO CONFORME A PLANILHA EXCEL)      -->
+    <!-- ========================================================================= -->
+    <section id="sec-modulo-contratos" class="hidden space-y-6">
+
+      <!-- BARRA DE SELEÇÃO DE CONTRATANTES (PONTO 12) -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+            MÓDULO DE CONTRATOS
+          </h2>
+          <p class="text-xs text-slate-500">
+            Alimentado automaticamente quando o status for "Homologado aguardando contrato" no comercial ou selecionado na lista de Contratantes.
+          </p>
+        </div>
+
+        <!-- TECLA CHAMADA CONTRATANTES (LINHA 1 DO EXCEL) -->
+        <div class="flex items-center space-x-2">
+          <label for="select-contratante-modulo" class="text-xs font-bold text-slate-700 uppercase">
+            CONTRATANTES:
+          </label>
+          <select id="select-contratante-modulo" onchange="window.borealApp.carregarContratanteNoModulo(this.value)" class="text-xs font-bold border border-slate-300 rounded-lg p-2 bg-amber-50/70 text-slate-900 max-w-xs md:max-w-md truncate focus:ring-[#B48D3C]">
+            <!-- Populado com os clientes contratados -->
+          </select>
+        </div>
+      </div>
+
+      <!-- PAINEL DE ENTRADA DO CONTRATO: LEITURA POR ANEXAÇÃO + MICROFONE ASSISTIDO -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <div class="lg:col-span-8 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span class="text-xs font-bold text-slate-800 uppercase">Leitura e Preenchimento Automático do Contrato</span>
+            <span class="text-[11px] text-slate-400">Todos os campos permanecem editáveis</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label class="px-3 py-2 bg-white border border-amber-300 hover:bg-amber-50 text-slate-800 rounded-lg text-xs font-semibold cursor-pointer flex items-center space-x-1.5 shadow-sm transition">
+              <i data-lucide="file-up" class="w-4 h-4 text-[#B48D3C]"></i>
+              <span>Anexar Minuta/Contrato Assinado</span>
+              <input type="file" accept=".pdf, .docx, .doc" class="hidden" onchange="window.borealApp.lerArquivoContrato(this)">
+            </label>
+
+            <!-- MICROFONE ASSISTIDO SEQUENCIAL (PONTO 13) -->
+            <button id="btn-mic-contrato" onclick="window.borealApp.alternarAudioContrato()" class="px-3 py-2 bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition">
+              <i data-lucide="mic" class="w-4 h-4 text-[#B48D3C]" id="icon-mic-contrato"></i>
+              <span id="lbl-mic-contrato">Preencher por Áudio (Voz)</span>
+            </button>
+            <span class="text-[11px] text-slate-500 italic hidden sm:inline" id="status-mic-contrato">
+              Clique em um campo e fale, ou fale os dados que o sistema preenche em sequência.
+            </span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-800 uppercase">Ações do Contrato</div>
+            <div class="text-[11px] text-slate-500">Grave no banco ou limpe campos individuais.</div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="window.borealApp.salvarContratoAtivo()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i>
+              <span>Salvar Contrato</span>
+            </button>
+            <button onclick="window.borealApp.apagarContratoAtivo()" class="px-2.5 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg text-xs font-semibold transition" title="Apagar Registro do Contrato">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FORMULÁRIO DO MÓDULO CONTRATOS (LINHAS 4, 6 E 8 DA PLANILHA EXCEL) -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 text-xs" id="box-formulario-contrato">
+        
+        <!-- SEÇÃO 1: QUALIFICAÇÃO E DADOS PRINCIPAIS DO CONTRATO (LINHA 4/5 DO EXCEL) -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-slate-900 uppercase">1. Dados do Contrato e Estabelecimento Principal</h3>
+            <span class="text-[11px] text-slate-400">Busca automática de CNAE e CEP integrada</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">CLIENTE:</label>
+              <input type="text" id="ct-cliente" class="table-input border border-slate-300 bg-white font-bold text-slate-900">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">CNPJ:</label>
+              <input type="text" id="ct-cnpj" onblur="window.borealApp.consultarCNPJBrasilAPI(this.value)" placeholder="00.000.000/0001-00" class="table-input border border-slate-300 bg-white font-mono">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">CNAE (Busca auto):</label>
+              <input type="text" id="ct-cnae" placeholder="Ex: 84.11-6-00" class="table-input border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">GRAU DE RISCO:</label>
+              <input type="text" id="ct-grau-risco" placeholder="Grau 1, 2, 3 ou 4" class="table-input border border-slate-300 bg-white">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">CEP (Busca auto via ViaCEP):</label>
+              <input type="text" id="ct-cep" onblur="window.borealApp.consultarCEPViaCEP(this.value)" placeholder="00000-000" class="table-input border border-slate-300 bg-white font-mono">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block font-semibold text-slate-700 mb-1">ENDEREÇO:</label>
+              <input type="text" id="ct-endereco" class="table-input border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Nº DO CONTRATO:</label>
+              <input type="text" id="ct-numero" class="table-input border border-slate-300 bg-white font-semibold">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">DATA DO CONTRATO (BR dd/mm/aaaa):</label>
+              <input type="text" id="ct-data" placeholder="dd/mm/aaaa" class="table-input border border-slate-300 bg-white font-semibold">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">VIGÊNCIA:</label>
+              <select id="ct-vigencia" class="table-input border border-slate-300 bg-white font-semibold">
+                <option value="6 meses">6 Meses</option>
+                <option value="1 ano" selected>1 Ano (12 meses)</option>
+                <option value="2 anos">2 Anos (24 meses)</option>
+                <option value="3 anos">3 Anos</option>
+                <option value="4 anos">4 Anos</option>
+                <option value="5 anos">5 Anos</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">TIPO DE CONTRATO:</label>
+              <select id="ct-tipo" class="table-input border border-slate-300 bg-white font-semibold">
+                <option value="Continuado" selected>Continuado</option>
+                <option value="Empreitada">Empreitada</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">HORÁRIO DE EXPEDIENTE:</label>
+              <input type="text" id="ct-horario" placeholder="Ex: 08:00 às 17:00" class="table-input border border-slate-300 bg-white">
+            </div>
+
+            <div class="md:col-span-3">
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">OBJETO DO CONTRATO:</label>
+                <button onclick="window.borealApp.abrirRelatorioProducaoDoContrato()" class="text-[#B48D3C] hover:underline font-bold text-[11px] flex items-center space-x-1">
+                  <span>(Ao clicar aqui abre-se o Relatório de Produção)</span>
+                  <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+                </button>
+              </div>
+              <textarea id="ct-objeto" rows="2" class="table-input border border-slate-300 bg-white"></textarea>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">ANEXO DE DOCUMENTOS (CONTRATO E DOCS):</label>
+              <div id="ct-lista-anexos" class="space-y-1 mb-1.5 max-h-20 overflow-y-auto"></div>
+              <label class="cursor-pointer px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded text-[11px] font-bold flex items-center justify-center space-x-1">
+                <i data-lucide="paperclip" class="w-3 h-3"></i>
+                <span>+ Anexar Documento</span>
+                <input type="file" accept=".pdf, .docx, .doc" class="hidden" onchange="window.borealApp.anexarDocContrato(this)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEÇÃO 2: FISCAL, CONTATO DE PAGTO E ALÍQUOTAS DE RETENÇÃO (LINHA 6/7 DO EXCEL) -->
+        <div class="space-y-3">
+          <div class="pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-slate-900 uppercase">2. Fiscais, Responsáveis pelo Pagamento e Alíquotas de Retenção</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+              <span class="font-bold text-slate-800 block">Fiscal do Contrato:</span>
+              <input type="text" id="ct-fiscal-nome" placeholder="NOME DO FISCAL" class="table-input border border-slate-300 bg-white">
+              <input type="text" id="ct-fiscal-tel" placeholder="TELEFONE" class="table-input border border-slate-300 bg-white">
+              <input type="email" id="ct-fiscal-email" placeholder="EMAIL DO FISCAL" class="table-input border border-slate-300 bg-white">
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+              <span class="font-bold text-slate-800 block">Contato de Pagamento:</span>
+              <input type="text" id="ct-pagto-nome" placeholder="CONTATO DE PAGTO" class="table-input border border-slate-300 bg-white">
+              <input type="text" id="ct-pagto-tel" placeholder="TEL DE PAGTO" class="table-input border border-slate-300 bg-white">
+              <input type="email" id="ct-pagto-email" placeholder="EMAIL DE PAGTO" class="table-input border border-slate-300 bg-white">
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+              <span class="font-bold text-slate-800 block">Alíquotas de Retenção (%):</span>
+              <div class="grid grid-cols-4 gap-1.5 text-[10px]">
+                <div><span class="block font-bold">ISS:</span><input type="number" step="0.1" id="ct-aliq-iss" value="5.0" class="table-input border bg-white p-1 text-center"></div>
+                <div><span class="block font-bold">COFINS:</span><input type="number" step="0.1" id="ct-aliq-cofins" value="3.0" class="table-input border bg-white p-1 text-center"></div>
+                <div><span class="block font-bold">CSLL:</span><input type="number" step="0.1" id="ct-aliq-csll" value="1.0" class="table-input border bg-white p-1 text-center"></div>
+                <div><span class="block font-bold">IRPJ:</span><input type="number" step="0.1" id="ct-aliq-irpj" value="1.5" class="table-input border bg-white p-1 text-center"></div>
+                <div><span class="block font-bold">PIS:</span><input type="number" step="0.05" id="ct-aliq-pis" value="0.65" class="table-input border bg-white p-1 text-center"></div>
+                <div><span class="block font-bold">CBS:</span><input type="number" step="0.1" id="ct-aliq-cbs" value="0.0" class="table-input border bg-white p-1 text-center"></div>
+                <div><span class="block font-bold">IBS:</span><input type="number" step="0.1" id="ct-aliq-ibs" value="0.0" class="table-input border bg-white p-1 text-center"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEÇÃO 3: GARANTIA CONTRATUAL E APÓLICE (LINHA 8 DO EXCEL) -->
+        <div class="space-y-3">
+          <div class="pb-2 border-b border-slate-100">
+            <h3 class="font-bold text-slate-900 uppercase">3. Garantia Contratual e Apólice</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">TIPO DE GARANTIA:</label>
+              <input type="text" id="ct-garantia-tipo" placeholder="Seguro Garantia / Fiança Bancária" class="table-input border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">PERCENTUAL (%):</label>
+              <input type="text" id="ct-garantia-perc" placeholder="Ex: 5%" class="table-input border border-slate-300 bg-white">
+            </div>
+            <div class="sigilo-valor">
+              <label class="block font-semibold text-slate-700 mb-1">VALOR DA APÓLICE (R$):</label>
+              <input type="number" step="0.01" id="ct-garantia-apolice" placeholder="0,00" class="table-input border border-slate-300 bg-white font-bold text-emerald-700">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">NOME DA CORRETORA:</label>
+              <input type="text" id="ct-garantia-corretora" placeholder="Corretora de Seguros" class="table-input border border-slate-300 bg-white">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">NOME DO CONTATO:</label>
+              <input type="text" id="ct-garantia-contato" class="table-input border border-slate-300 bg-white">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">TELEFONE:</label>
+              <input type="text" id="ct-garantia-tel" class="table-input border border-slate-300 bg-white">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block font-semibold text-slate-700 mb-1">EMAIL DA CORRETORA:</label>
+              <input type="email" id="ct-garantia-email" class="table-input border border-slate-300 bg-white">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MÓDULO 3: RELATÓRIO DE PRODUÇÃO (ISOLADO E REESTRUTURADO)                 -->
+    <!-- ========================================================================= -->
+    <section id="sec-relatorio-producao" class="hidden space-y-6">
+
+      <!-- SELETOR DE CLIENTE EM PRODUÇÃO -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+            RELATÓRIO DE PRODUÇÃO (GESTÃO DE ITENS & ENTREGAS)
+          </h2>
+          <p class="text-xs text-slate-500">
+            Acompanhamento dos itens contratados. Ao marcar "Concluído", gera o Relatório de Entrega; ao marcar "Entregue e Aceito", dispara solicitação de NF.
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <label class="text-xs font-bold text-slate-700 uppercase">Cliente em Produção:</label>
+          <select id="select-cliente-producao" onchange="window.borealApp.carregarProducaoCliente(this.value)" class="text-xs font-bold border border-slate-300 rounded-lg p-2 bg-amber-50/70 text-slate-900 max-w-xs md:max-w-md truncate focus:ring-[#B48D3C]">
+            <!-- Populado com clientes que possuem produção -->
+          </select>
+        </div>
+      </div>
+
+      <!-- MATRIZ DE PRODUÇÃO (AS 10 COLUNAS EXATAS DA TABELA 1) -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+          <div>
+            <h3 class="text-xs font-bold text-slate-800 uppercase" id="lbl-producao-cliente-ativo">
+              ITENS DE SERVIÇO EM PRODUÇÃO
+            </h3>
+            <span class="text-[11px] text-slate-500" id="lbl-producao-objeto-resumo"></span>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="window.borealApp.adicionarItemProducaoManual()" class="px-3 py-1.5 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Adicionar Item</span>
+            </button>
+            <button onclick="window.borealApp.fazerPropostaAutomaticaModulo3()" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition sigilo-valor">
+              <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+              <span>Fazer Proposta</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-lg">
+          <table class="w-full text-xs text-left whitespace-nowrap">
+            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-2 border-r min-w-[170px]">TIPO DE CONTRATO</th>
+                <th class="p-2 border-r w-12 text-center">ITEM</th>
+                <th class="p-2 border-r min-w-[240px]">OBJETO</th>
+                <th class="p-2 border-r w-16 text-center">QUANT.</th>
+                <th class="p-2 border-r w-16 text-center">UNID.</th>
+                <th class="p-2 border-r w-28 text-right sigilo-valor">VL UNIT. (R$)</th>
+                <th class="p-2 border-r w-32 text-right sigilo-valor">VL TOTAL (R$)</th>
+                <th class="p-2 border-r min-w-[220px]">STATUS DE PRODUÇÃO</th>
+                <th class="p-2 border-r text-center w-28">AÇÃO</th>
+                <th class="p-2 min-w-[200px]">REL. DE ENTREGA DE SERVIÇO</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-relatorio-producao-modulo3" class="divide-y divide-slate-100 bg-white">
+              <!-- Linhas de produção daquele cliente -->
+            </tbody>
+            <tfoot class="bg-slate-50 font-bold border-t border-slate-200 sigilo-valor">
+              <tr>
+                <td colspan="6" class="p-2.5 text-right uppercase">Totalizador Global dos Itens Contratados:</td>
+                <td class="p-2.5 text-right text-emerald-700 font-bold text-sm" id="lbl-producao-total-modulo3">R$ 0,00</td>
+                <td colspan="3" class="p-2.5 text-slate-400 text-[11px] italic">Cálculo Automático pelo Sistema</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 
@@ -247,31 +633,28 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- ABA 2: MÓDULO DE DOCUMENTOS PADRÕES (PROPOSTAS, RELATÓRIOS E CRONOGRAMAS) -->
+    <!-- MÓDULO 4: DOCUMENTOS PADRÕES (PROPOSTA, OFÍCIO, CRONOGRAMAS E HASH)      -->
     <!-- ========================================================================= -->
-    <section id="sec-documentos-padroes" class="hidden space-y-6">
+    <section id="sec-documentos-padroes" class="hidden space-y-6 sigilo-valor">
 
-      <!-- SELEÇÃO DUPLA: CLIENTES VENCEDORES/SOLICITANTES + MODELO DE DOCUMENTO -->
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
-            Emissão Oficial de Documentos Boreal ENGMED
+            Emissão Oficial de Documentos Padrões Boreal
           </h1>
           <p class="text-xs text-slate-500">
-            Preenchimento automático a partir do cliente selecionado no Relatório Comercial ou Produção.
+            Layout fiel em fonte Cambria 10 com geração de código de integridade SHA-256 no rodapé.
           </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <!-- 1. LISTA SUSPENSA DE CLIENTES (AUTOMÁTICA) -->
           <div class="flex items-center space-x-1.5">
             <label class="text-xs font-bold text-slate-700 uppercase">Cliente:</label>
             <select id="doc-select-cliente" onchange="window.borealApp.mudarClienteDocumento(this.value)" class="text-xs font-semibold border border-slate-300 rounded-lg p-2 bg-amber-50/70 text-slate-900 max-w-xs truncate focus:ring-[#B48D3C]">
-              <!-- Populado com clientes do relatório comercial -->
+              <!-- Populado via script -->
             </select>
           </div>
 
-          <!-- 2. LISTA SUSPENSA DE MODELOS DE DOCUMENTOS -->
           <div class="flex items-center space-x-1.5">
             <label class="text-xs font-bold text-slate-700 uppercase">Documento:</label>
             <select id="doc-select-modelo" onchange="window.borealApp.mudarModeloDocumento(this.value)" class="text-xs font-bold border border-slate-300 rounded-lg p-2 bg-white text-slate-900 focus:ring-[#B48D3C]">
@@ -287,45 +670,44 @@
         </div>
       </div>
 
-      <!-- PAINEL DUPLO: COLUNA ESQUERDA (EDIÇÃO) | COLUNA DIREITA (PREVIEW CAMBRIA 10) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- COLUNA ESQUERDA: PARÂMETROS E TABELA EDITÁVEL -->
+        <!-- AMBIENTE DE EDIÇÃO À ESQUERDA -->
         <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 text-xs">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h3 class="font-bold text-slate-800 uppercase">Edição de Campos e Objetos</h3>
+            <h3 class="font-bold text-slate-800 uppercase">Parâmetros de Edição do Documento</h3>
             <span class="font-bold text-[#B48D3C]" id="lbl-numero-doc-oficial">OFÍCIO Nº 0001/2026</span>
           </div>
 
           <div class="space-y-2.5">
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Destinatário (À):</label>
-              <input type="text" id="doc-in-destinatario" class="w-full border border-slate-300 rounded p-1.5 focus:ring-[#B48D3C]">
+              <input type="text" id="doc-in-destinatario" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="block font-semibold text-slate-600 mb-1">Aos Cuidados (A/C):</label>
-                <input type="text" id="doc-in-ac" class="w-full border border-slate-300 rounded p-1.5 focus:ring-[#B48D3C]">
+                <input type="text" id="doc-in-ac" class="table-input border border-slate-300 bg-white">
               </div>
               <div>
                 <label class="block font-semibold text-slate-600 mb-1">Assunto:</label>
-                <input type="text" id="doc-in-assunto" class="w-full border border-slate-300 rounded p-1.5 focus:ring-[#B48D3C]">
+                <input type="text" id="doc-in-assunto" class="table-input border border-slate-300 bg-white">
               </div>
             </div>
 
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Referência (Ref.):</label>
-              <input type="text" id="doc-in-ref" class="w-full border border-slate-300 rounded p-1.5 focus:ring-[#B48D3C]">
+              <input type="text" id="doc-in-ref" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Texto Introdutório / Proposta para:</label>
-              <textarea id="doc-in-objeto" rows="3" class="w-full border border-slate-300 rounded p-1.5 focus:ring-[#B48D3C]"></textarea>
+              <textarea id="doc-in-objeto" rows="3" class="table-input border border-slate-300 bg-white"></textarea>
             </div>
           </div>
 
-          <!-- TABELA DE OBJETOS COM TECLA ADICIONAR (ADAPTAVEL CONFORME O DOCUMENTO) -->
+          <!-- TABELA DE OBJETOS COM TECLA ADICIONAR -->
           <div id="box-doc-tabela-itens" class="space-y-2 border-t border-slate-200 pt-3">
             <div class="flex items-center justify-between">
               <span class="font-bold text-slate-800 uppercase" id="lbl-doc-tabela-titulo">Tabela de Objetos / Serviços</span>
@@ -337,16 +719,11 @@
 
             <div class="overflow-x-auto border border-slate-200 rounded max-h-56 overflow-y-auto">
               <table class="w-full text-xs text-left" id="tabela-doc-itens-esquerda">
-                <thead class="bg-slate-100 text-slate-700 font-bold border-b sticky top-0" id="thead-doc-itens">
-                  <!-- Gerado dinamicamente -->
-                </thead>
-                <tbody id="tbody-doc-itens" class="divide-y divide-slate-100 bg-white">
-                  <!-- Linhas editáveis -->
-                </tbody>
+                <thead class="bg-slate-100 text-slate-700 font-bold border-b sticky top-0" id="thead-doc-itens"></thead>
+                <tbody id="tbody-doc-itens" class="divide-y divide-slate-100 bg-white"></tbody>
               </table>
             </div>
 
-            <!-- TOTALIZADOR (QUANDO APLICÁVEL) -->
             <div id="box-doc-totalizador" class="bg-amber-50/60 p-2.5 rounded border border-amber-200 flex items-center justify-between text-xs">
               <span class="font-bold text-amber-950 uppercase">Valor Total Calculado:</span>
               <span class="font-bold text-emerald-700 text-sm" id="lbl-doc-total-calculado">R$ 0,00</span>
@@ -357,31 +734,30 @@
           <div class="grid grid-cols-2 gap-2 border-t border-slate-200 pt-3">
             <div id="box-doc-validade">
               <label class="block font-semibold text-slate-600 mb-1">Validade da Proposta:</label>
-              <input type="text" id="doc-in-validade" value="120 (cento e vinte) dias corridos a partir desta data." class="w-full border border-slate-300 rounded p-1.5 focus:ring-[#B48D3C]">
+              <input type="text" id="doc-in-validade" value="120 (cento e vinte) dias corridos a partir desta data." class="table-input border border-slate-300 bg-white">
             </div>
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Data da Emissão:</label>
-              <input type="text" id="doc-in-data" value="Paulínia/SP, 10 de Novembro de 2026" class="w-full border border-slate-300 rounded p-1.5 focus:ring-[#B48D3C]">
+              <label class="block font-semibold text-slate-600 mb-1">Data da Emissão (dd/mm/aaaa):</label>
+              <input type="text" id="doc-in-data" value="10/11/2026" class="table-input border border-slate-300 bg-white">
             </div>
           </div>
 
-          <!-- BOTÕES DE EXPORTAÇÃO E ANEXAÇÃO DIRETA NA PRODUÇÃO -->
+          <!-- BOTÕES DE DOWNLOAD E VINCULAÇÃO -->
           <div class="flex items-center space-x-2 pt-2">
             <button onclick="window.borealApp.baixarDocWord()" class="flex-1 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition">
               <i data-lucide="file-text" class="w-4 h-4"></i>
               <span>Baixar em Word (.docx)</span>
             </button>
-            <button onclick="window.borealApp.salvarEAnexarNaProducao()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition" title="Salva em PDF e anexa na coluna de Ação do Relatório de Produção do Cliente">
+            <button onclick="window.borealApp.salvarPropostaNoComercial()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition" title="Salva e anexa na coluna de Proposta do Relatório Comercial">
               <i data-lucide="check-circle" class="w-4 h-4"></i>
-              <span>Salvar & Anexar na Produção</span>
+              <span>Salvar & Anexar no Comercial</span>
             </button>
           </div>
         </div>
 
-        <!-- COLUNA DIREITA: PREVIEW OFICIAL EM CAMBRIA 10 COM VALIDAÇÃO HASH SHA-256 -->
+        <!-- PREVIEW EM CAMBRIA 10 COM HASH SHA-256 NO RODAPÉ (PONTO 18) -->
         <div class="lg:col-span-7 bg-white p-8 sm:p-10 rounded-xl border border-slate-300 shadow-sm doc-cambria space-y-4" id="box-preview-documento-oficial">
           
-          <!-- CABEÇALHO BOREAL ENGMED -->
           <div class="border-b-2 border-[#B48D3C] pb-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 rounded bg-[#4A4A4A] flex items-center justify-center font-bold text-xl text-[#B48D3C] border border-[#B48D3C]">
@@ -398,7 +774,6 @@
             </div>
           </div>
 
-          <!-- ENDEREÇAMENTO -->
           <div class="space-y-1">
             <div class="font-bold text-slate-900" id="pv-doc-titulo-tipo">Assunto: Proposta Comercial</div>
             <div class="pt-1"><strong>À:</strong> <span id="pv-doc-destinatario">Nome do Órgão / Solicitante</span></div>
@@ -407,15 +782,12 @@
             <div><strong>Ref.:</strong> <span id="pv-doc-ref">Processo de Contratação</span></div>
           </div>
 
-          <!-- QUALIFICAÇÃO / TEXTO PADRÃO -->
           <div class="pt-2 text-slate-800 leading-relaxed" id="pv-doc-qualificacao">
             A Boreal ENGMED Ltda, sediada no Município de Paulínia - SP, Av. José Puccinelli, 130 - João Aranha - Paulínia - SP, CEP 13.146.000, inscrita no CNPJ/MF sob o Nº 04.414.837/0001-38, neste ato representada por seu Representante Legal Sr. Luiz Fernando Gomes de Jesus, CPF 933.425.197.20 RG 363951210, submete a VS o documento para: <span id="pv-doc-objeto-compl" class="text-slate-900 font-semibold">Prestação de serviços especializados em engenharia de segurança e medicina do trabalho</span>.
           </div>
 
-          <!-- TABELA DINÂMICA DENTRO DO PREVIEW -->
           <div id="pv-doc-tabela-box" class="pt-2"></div>
 
-          <!-- DECLARAÇÕES LEGAIS E DADOS BANCÁRIOS (PROPOSTA) -->
           <div id="pv-doc-bloco-declaracoes" class="space-y-2 text-slate-800 pt-2 text-[9.5pt]">
             <div><strong>Valor Global da Proposta:</strong> <span id="pv-doc-valor-extenso" class="font-bold text-slate-900">R$ 0,00 (Zero reais)</span></div>
             <div class="text-justify leading-snug">
@@ -426,7 +798,6 @@
             <div><strong>- Dados Bancários:</strong> Conta Corrente: 54625-9 Agência 2417-1 Banco do Brasil</div>
           </div>
 
-          <!-- ASSINATURA NO CANTO INFERIOR ESQUERDO COM HASH SHA-256 NO RODAPÉ -->
           <div class="pt-6 border-t border-slate-200 flex flex-col items-start space-y-1">
             <div id="pv-doc-data" class="text-slate-600 pb-2">Paulínia/SP, 10 de Novembro de 2026</div>
             <div class="text-slate-800 font-semibold">Atenciosamente,</div>
@@ -437,7 +808,7 @@
               Av. José Puccinelli, 130 - João Aranha - Paulínia - SP CEP 13.146.000 Tel 19 99156 7153 - contato@boreal.eng.br
             </div>
 
-            <!-- RODAPÉ DE VALIDAÇÃO DIGITAL SHA-256 (PONTO 18) -->
+            <!-- RODAPÉ SHA-256 -->
             <div class="mt-4 pt-2 border-t border-dashed border-slate-300 w-full text-[8pt] text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1 bg-slate-50 p-2 rounded">
               <div>
                 <strong>Autenticidade e Integridade Digital:</strong>
@@ -456,43 +827,43 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- ABA 3: PORTAL EXTERNO DO CLIENTE (CONSULTA DE RELATÓRIOS ANEXADOS)       -->
+    <!-- MÓDULO 5: ACESSO EXTERNO DO CLIENTE (PORTAL INDIVIDUALIZADO)              -->
     <!-- ========================================================================= -->
     <section id="sec-portal-cliente" class="hidden space-y-6">
-      
+
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">
-            Portal de Consulta Externa do Contratante / Fiscal
+            Portal de Acesso Externo do Contratante / Fiscal
           </h2>
           <p class="text-xs text-slate-500">
-            Simulação da área restrita do cliente logado no Supabase. O fiscal acessa e visualiza apenas os Relatórios de Entrega anexados ao seu contrato.
+            Cada cliente só visualiza e baixa estritamente os relatórios de entrega vinculados ao seu próprio contrato.
           </p>
         </div>
 
         <div class="flex items-center space-x-2">
-          <label class="text-xs font-bold text-slate-700">Perfil Conectado:</label>
-          <select id="select-portal-cliente" onchange="window.borealApp.renderizarPortalCliente(this.value)" class="text-xs font-semibold border border-slate-300 rounded p-1.5 bg-slate-50">
-            <!-- Populado com clientes que possuem relatórios anexados -->
+          <label class="text-xs font-bold text-slate-700">Cliente Logado:</label>
+          <select id="select-portal-cliente-logado" onchange="window.borealApp.renderizarPortalCliente(this.value)" class="text-xs font-semibold border border-slate-300 rounded p-1.5 bg-slate-50">
+            <!-- Populado via script -->
           </select>
         </div>
       </div>
 
       <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <h3 class="text-xs font-bold text-slate-700 uppercase" id="lbl-portal-cliente-nome">Relatórios Disponíveis</h3>
+        <h3 class="text-xs font-bold text-slate-700 uppercase" id="lbl-portal-cliente-nome">Relatórios de Entrega Disponíveis</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-xs text-left border">
             <thead class="bg-slate-100 font-bold border-b">
               <tr>
                 <th class="p-2.5">Nome do Relatório</th>
-                <th class="p-2.5">Data de Emissão</th>
-                <th class="p-2.5">Objetos Relacionados</th>
-                <th class="p-2.5">Código Hash SHA-256</th>
+                <th class="p-2.5">Data de Emissão (dd/mm/aaaa)</th>
+                <th class="p-2.5">Serviço / Objeto</th>
+                <th class="p-2.5">Código Hash de Validação</th>
                 <th class="p-2.5 text-center">Download / Visualização</th>
               </tr>
             </thead>
             <tbody id="tbody-portal-cliente-relatorios" class="divide-y divide-slate-100">
-              <!-- Populado com os relatórios anexados daquele cliente -->
+              <!-- Populado via script -->
             </tbody>
           </table>
         </div>
@@ -502,7 +873,38 @@
 
   </main>
 
-  <!-- MODAL: RELATÓRIO GERAL CONSOLIDADO (PONTO 12) -->
+  <!-- MODAL: LOGIN / SENHA SALVA (PONTO 1) -->
+  <div id="modal-login-senha" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="text-sm font-bold text-slate-800 uppercase">Definir / Salvar Senha de Acesso</h3>
+        <button onclick="window.borealApp.fecharModalLogin()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <p class="text-xs text-slate-500">
+        A senha fica gravada localmente e associada ao seu e-mail no Supabase para login automático.
+      </p>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">E-mail Cadastrado:</label>
+          <input type="email" id="login-input-email" value="gestor@boreal.eng.br" class="table-input border border-slate-300 bg-white">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Senha:</label>
+          <input type="password" id="login-input-senha" class="table-input border border-slate-300 bg-white">
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="login-check-lembrar" checked class="rounded text-[#B48D3C]">
+          <label for="login-check-lembrar" class="text-slate-600 font-medium">Lembrar senha neste dispositivo (Login automático)</label>
+        </div>
+      </div>
+      <div class="flex items-center justify-end space-x-2 pt-2">
+        <button onclick="window.borealApp.fecharModalLogin()" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded text-xs font-semibold">Cancelar</button>
+        <button onclick="window.borealApp.salvarCredenciaisSenha()" class="px-3 py-1.5 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded text-xs font-semibold">Gravar Senha</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RELATÓRIO CONSOLIDADO DE TODOS OS CLIENTES (PONTO 12) -->
   <div id="modal-consolidado" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden">
       <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
@@ -521,9 +923,7 @@
         </div>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-4" id="box-impressao-consolidada">
-        <!-- Renderizado dinamicamente com os totais de entregues e em andamento -->
-      </div>
+      <div class="p-6 overflow-y-auto space-y-4" id="box-impressao-consolidada"></div>
     </div>
   </div>
 
