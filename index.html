@@ -13,6 +13,8 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- html2pdf.js para exportar PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Supabase JS CDN Oficial v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- PDF.js para leitura real de arquivos PDF no navegador -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
@@ -59,7 +61,7 @@
       outline: none;
       box-shadow: 0 0 0 2px rgba(180, 141, 60, 0.2);
     }
-    /* Classe para ocultar valores e propostas no perfil Agente */
+    /* Ocultar valores e propostas no perfil Agente */
     body.perfil-agente .sigilo-valor {
       display: none !important;
     }
@@ -87,9 +89,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- ========================================================================= -->
-  <!-- BARRA DE AUTENTICAÇÃO / LOGIN & CONTROLE DE PERFIL (COM LEMBRAR SENHA)   -->
-  <!-- ========================================================================= -->
+  <!-- BARRA DE AUTENTICAÇÃO E PERFIL -->
   <div class="bg-slate-900 text-slate-200 text-xs px-4 py-2 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center space-x-2">
       <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
@@ -97,7 +97,6 @@
       <span id="lbl-usuario-conectado" class="font-bold text-[#B48D3C]">gestor@boreal.eng.br (Gestor)</span>
     </div>
 
-    <!-- CONTROLES DE LOGIN RÁPIDO E ALTERAÇÃO DE PERFIL COM SENHA SALVA -->
     <div class="flex items-center space-x-3">
       <div class="flex items-center space-x-1.5">
         <label for="select-perfil-sistema" class="text-slate-400">Perfil:</label>
@@ -139,7 +138,7 @@
         </span>
       </div>
 
-      <!-- BUSCA DE CLIENTES NA BARRA SUPERIOR (PONTO 3: APENAS 'CLIENTES') -->
+      <!-- BUSCA DE CLIENTES (PONTO 3: APENAS 'CLIENTES') -->
       <div class="flex items-center space-x-3">
         <div class="flex items-center space-x-1.5 bg-amber-50/70 border border-amber-300 rounded-lg p-1.5">
           <i data-lucide="users" class="w-4 h-4 text-[#B48D3C]"></i>
@@ -147,7 +146,7 @@
             CLIENTES:
           </label>
           <select id="select-global-busca-cliente" onchange="window.borealApp.navegarParaCliente(this.value)" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:ring-0 p-0 max-w-xs md:max-w-sm truncate">
-            <!-- Populado dinamicamente com todos os clientes registrados -->
+            <!-- Populado dinamicamente -->
           </select>
         </div>
 
@@ -164,7 +163,7 @@
 
     </div>
 
-    <!-- NAVEGAÇÃO ENTRE OS MÓDULOS SEPARADOS (PONTO 5, 7, 8) -->
+    <!-- ABAS DOS MÓDULOS -->
     <nav class="max-w-[1750px] mx-auto px-4 sm:px-6 flex space-x-1 overflow-x-auto border-t border-slate-100 text-xs font-semibold">
       <button onclick="window.borealApp.abrirModulo('relatorio_comercial')" class="tab-nav active px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" id="tab-nav-relatorio">
         <i data-lucide="layout-grid" class="w-4 h-4 text-[#B48D3C]"></i>
@@ -193,7 +192,7 @@
     </nav>
   </header>
 
-  <!-- CORPO PRINCIPAL -->
+  <!-- CONTEÚDO PRINCIPAL -->
   <main class="flex-1 max-w-[1750px] w-full mx-auto p-4 sm:p-6 space-y-6">
 
     <!-- ========================================================================= -->
@@ -201,10 +200,9 @@
     <!-- ========================================================================= -->
     <section id="sec-relatorio-comercial" class="space-y-6">
 
-      <!-- PAINEL SUPERIOR: RADAR EXTERNO EDITÁVEL + ANEXAÇÃO DE EDITAIS COM PDF.JS -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
-        <!-- CARD 1: RADAR DE EDITAIS COM LINK CONFIGURÁVEL -->
+        <!-- CARD 1: RADAR DE EDITAIS -->
         <div class="lg:col-span-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <div class="flex items-center space-x-2">
@@ -232,7 +230,7 @@
           </div>
         </div>
 
-        <!-- CARD 2: ANEXAÇÃO DO EDITAL / TR COM LEITURA REAL VIA PDF.JS -->
+        <!-- CARD 2: ANEXAÇÃO DO EDITAL / TR COM PDF.JS -->
         <div class="lg:col-span-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <div class="flex items-center space-x-2">
@@ -261,7 +259,7 @@
 
       </div>
 
-      <!-- MATRIZ DO RELATÓRIO COMERCIAL (PONTOS 4, 5, 6: LINHAS SEQUENCIAIS, SEM CNPJ/ENDEREÇO) -->
+      <!-- MATRIZ DO RELATÓRIO COMERCIAL -->
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
           <div>
@@ -303,7 +301,7 @@
               </tr>
             </thead>
             <tbody id="tbody-relatorio-comercial" class="divide-y divide-slate-100 bg-white">
-              <!-- Linhas sequenciais uma embaixo da outra -->
+              <!-- Linhas geradas dinamicamente -->
             </tbody>
           </table>
         </div>
@@ -312,11 +310,10 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- MÓDULO 2: CONTRATOS (NOVO MÓDULO SEPARADO CONFORME A PLANILHA EXCEL)      -->
+    <!-- MÓDULO 2: CONTRATOS (SEPARADO)                                            -->
     <!-- ========================================================================= -->
     <section id="sec-modulo-contratos" class="hidden space-y-6">
 
-      <!-- BARRA DE SELEÇÃO DE CONTRATANTES (PONTO 12) -->
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
@@ -327,7 +324,6 @@
           </p>
         </div>
 
-        <!-- TECLA CHAMADA CONTRATANTES (LINHA 1 DO EXCEL) -->
         <div class="flex items-center space-x-2">
           <label for="select-contratante-modulo" class="text-xs font-bold text-slate-700 uppercase">
             CONTRATANTES:
@@ -338,9 +334,8 @@
         </div>
       </div>
 
-      <!-- PAINEL DE ENTRADA DO CONTRATO: LEITURA POR ANEXAÇÃO + MICROFONE ASSISTIDO -->
+      <!-- PAINEL DE ENTRADA DO CONTRATO: ANEXAÇÃO + MICROFONE -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        
         <div class="lg:col-span-8 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <span class="text-xs font-bold text-slate-800 uppercase">Leitura e Preenchimento Automático do Contrato</span>
@@ -353,7 +348,6 @@
               <input type="file" accept=".pdf, .docx, .doc" class="hidden" onchange="window.borealApp.lerArquivoContrato(this)">
             </label>
 
-            <!-- MICROFONE ASSISTIDO SEQUENCIAL (PONTO 13) -->
             <button id="btn-mic-contrato" onclick="window.borealApp.alternarAudioContrato()" class="px-3 py-2 bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition">
               <i data-lucide="mic" class="w-4 h-4 text-[#B48D3C]" id="icon-mic-contrato"></i>
               <span id="lbl-mic-contrato">Preencher por Áudio (Voz)</span>
@@ -379,13 +373,11 @@
             </button>
           </div>
         </div>
-
       </div>
 
-      <!-- FORMULÁRIO DO MÓDULO CONTRATOS (LINHAS 4, 6 E 8 DA PLANILHA EXCEL) -->
+      <!-- FORMULÁRIO COMPLETO DO CONTRATO -->
       <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 text-xs" id="box-formulario-contrato">
         
-        <!-- SEÇÃO 1: QUALIFICAÇÃO E DADOS PRINCIPAIS DO CONTRATO (LINHA 4/5 DO EXCEL) -->
         <div class="space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <h3 class="font-bold text-slate-900 uppercase">1. Dados do Contrato e Estabelecimento Principal</h3>
@@ -473,7 +465,6 @@
           </div>
         </div>
 
-        <!-- SEÇÃO 2: FISCAL, CONTATO DE PAGTO E ALÍQUOTAS DE RETENÇÃO (LINHA 6/7 DO EXCEL) -->
         <div class="space-y-3">
           <div class="pb-2 border-b border-slate-100">
             <h3 class="font-bold text-slate-900 uppercase">2. Fiscais, Responsáveis pelo Pagamento e Alíquotas de Retenção</h3>
@@ -509,7 +500,6 @@
           </div>
         </div>
 
-        <!-- SEÇÃO 3: GARANTIA CONTRATUAL E APÓLICE (LINHA 8 DO EXCEL) -->
         <div class="space-y-3">
           <div class="pb-2 border-b border-slate-100">
             <h3 class="font-bold text-slate-900 uppercase">3. Garantia Contratual e Apólice</h3>
@@ -553,11 +543,10 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- MÓDULO 3: RELATÓRIO DE PRODUÇÃO (ISOLADO E REESTRUTURADO)                 -->
+    <!-- MÓDULO 3: RELATÓRIO DE PRODUÇÃO (SEPARADO)                                -->
     <!-- ========================================================================= -->
     <section id="sec-relatorio-producao" class="hidden space-y-6">
 
-      <!-- SELETOR DE CLIENTE EM PRODUÇÃO -->
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
@@ -576,9 +565,7 @@
         </div>
       </div>
 
-      <!-- MATRIZ DE PRODUÇÃO (AS 10 COLUNAS EXATAS DA TABELA 1) -->
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
           <div>
             <h3 class="text-xs font-bold text-slate-800 uppercase" id="lbl-producao-cliente-ativo">
@@ -627,13 +614,12 @@
             </tfoot>
           </table>
         </div>
-
       </div>
 
     </section>
 
     <!-- ========================================================================= -->
-    <!-- MÓDULO 4: DOCUMENTOS PADRÕES (PROPOSTA, OFÍCIO, CRONOGRAMAS E HASH)      -->
+    <!-- MÓDULO 4: DOCUMENTOS PADRÕES                                              -->
     <!-- ========================================================================= -->
     <section id="sec-documentos-padroes" class="hidden space-y-6 sigilo-valor">
 
@@ -672,7 +658,6 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- AMBIENTE DE EDIÇÃO À ESQUERDA -->
         <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 text-xs">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <h3 class="font-bold text-slate-800 uppercase">Parâmetros de Edição do Documento</h3>
@@ -707,7 +692,6 @@
             </div>
           </div>
 
-          <!-- TABELA DE OBJETOS COM TECLA ADICIONAR -->
           <div id="box-doc-tabela-itens" class="space-y-2 border-t border-slate-200 pt-3">
             <div class="flex items-center justify-between">
               <span class="font-bold text-slate-800 uppercase" id="lbl-doc-tabela-titulo">Tabela de Objetos / Serviços</span>
@@ -730,7 +714,6 @@
             </div>
           </div>
 
-          <!-- DATA E CONDIÇÕES -->
           <div class="grid grid-cols-2 gap-2 border-t border-slate-200 pt-3">
             <div id="box-doc-validade">
               <label class="block font-semibold text-slate-600 mb-1">Validade da Proposta:</label>
@@ -742,7 +725,6 @@
             </div>
           </div>
 
-          <!-- BOTÕES DE DOWNLOAD E VINCULAÇÃO -->
           <div class="flex items-center space-x-2 pt-2">
             <button onclick="window.borealApp.baixarDocWord()" class="flex-1 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition">
               <i data-lucide="file-text" class="w-4 h-4"></i>
@@ -755,7 +737,6 @@
           </div>
         </div>
 
-        <!-- PREVIEW EM CAMBRIA 10 COM HASH SHA-256 NO RODAPÉ (PONTO 18) -->
         <div class="lg:col-span-7 bg-white p-8 sm:p-10 rounded-xl border border-slate-300 shadow-sm doc-cambria space-y-4" id="box-preview-documento-oficial">
           
           <div class="border-b-2 border-[#B48D3C] pb-3 flex items-center justify-between">
