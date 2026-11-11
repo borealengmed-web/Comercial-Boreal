@@ -89,7 +89,9 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- BARRA DE AUTENTICAÇÃO E PERFIL -->
+  <!-- ========================================================================= -->
+  <!-- BARRA DE AUTENTICAÇÃO / LOGIN & CONTROLE DE PERFIL (COM LEMBRAR SENHA)   -->
+  <!-- ========================================================================= -->
   <div class="bg-slate-900 text-slate-200 text-xs px-4 py-2 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center space-x-2">
       <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
@@ -138,7 +140,7 @@
         </span>
       </div>
 
-      <!-- BUSCA DE CLIENTES (PONTO 3: APENAS 'CLIENTES') -->
+      <!-- BUSCA DE CLIENTES (APENAS 'CLIENTES') -->
       <div class="flex items-center space-x-3">
         <div class="flex items-center space-x-1.5 bg-amber-50/70 border border-amber-300 rounded-lg p-1.5">
           <i data-lucide="users" class="w-4 h-4 text-[#B48D3C]"></i>
@@ -146,7 +148,7 @@
             CLIENTES:
           </label>
           <select id="select-global-busca-cliente" onchange="window.borealApp.navegarParaCliente(this.value)" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:ring-0 p-0 max-w-xs md:max-w-sm truncate">
-            <!-- Populado dinamicamente -->
+            <option value="">Nenhum cliente cadastrado</option>
           </select>
         </div>
 
@@ -163,7 +165,7 @@
 
     </div>
 
-    <!-- ABAS DOS MÓDULOS -->
+    <!-- NAVEGAÇÃO DOS 5 MÓDULOS -->
     <nav class="max-w-[1750px] mx-auto px-4 sm:px-6 flex space-x-1 overflow-x-auto border-t border-slate-100 text-xs font-semibold">
       <button onclick="window.borealApp.abrirModulo('relatorio_comercial')" class="tab-nav active px-4 py-3 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap" id="tab-nav-relatorio">
         <i data-lucide="layout-grid" class="w-4 h-4 text-[#B48D3C]"></i>
@@ -192,7 +194,7 @@
     </nav>
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL -->
+  <!-- CORPO PRINCIPAL -->
   <main class="flex-1 max-w-[1750px] w-full mx-auto p-4 sm:p-6 space-y-6">
 
     <!-- ========================================================================= -->
@@ -202,7 +204,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
-        <!-- CARD 1: RADAR DE EDITAIS -->
+        <!-- CARD 1: RADAR DE EDITAIS COM LINK CONFIGURÁVEL -->
         <div class="lg:col-span-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <div class="flex items-center space-x-2">
@@ -276,6 +278,10 @@
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>Novo Processo</span>
             </button>
+            <button onclick="window.borealApp.limparTodosProcessosComerciais()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition" title="Apagar todos os dados para reiniciar cadastro">
+              <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+              <span>Limpar Tabela</span>
+            </button>
             <button onclick="window.borealApp.exportarRelatorioExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
               <span>Exportar Excel</span>
@@ -301,7 +307,7 @@
               </tr>
             </thead>
             <tbody id="tbody-relatorio-comercial" class="divide-y divide-slate-100 bg-white">
-              <!-- Linhas geradas dinamicamente -->
+              <!-- Populado dinamicamente -->
             </tbody>
           </table>
         </div>
@@ -310,7 +316,7 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- MÓDULO 2: CONTRATOS (SEPARADO)                                            -->
+    <!-- MÓDULO 2: CONTRATOS (NOVO MÓDULO COM BOTÕES DE LIMPAR CAMPOS)            -->
     <!-- ========================================================================= -->
     <section id="sec-modulo-contratos" class="hidden space-y-6">
 
@@ -329,7 +335,7 @@
             CONTRATANTES:
           </label>
           <select id="select-contratante-modulo" onchange="window.borealApp.carregarContratanteNoModulo(this.value)" class="text-xs font-bold border border-slate-300 rounded-lg p-2 bg-amber-50/70 text-slate-900 max-w-xs md:max-w-md truncate focus:ring-[#B48D3C]">
-            <!-- Populado com os clientes contratados -->
+            <option value="">Nenhum contratante selecionado</option>
           </select>
         </div>
       </div>
@@ -368,14 +374,15 @@
               <i data-lucide="save" class="w-3.5 h-3.5"></i>
               <span>Salvar Contrato</span>
             </button>
-            <button onclick="window.borealApp.apagarContratoAtivo()" class="px-2.5 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg text-xs font-semibold transition" title="Apagar Registro do Contrato">
+            <button onclick="window.borealApp.apagarContratoAtivo()" class="px-2.5 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg text-xs font-semibold transition" title="Limpar todos os campos deste contrato">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Limpar Campos</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- FORMULÁRIO COMPLETO DO CONTRATO -->
+      <!-- FORMULÁRIO COMPLETO DO CONTRATO COM BOTÕES INDIVIDUAIS DE LIMPEZA -->
       <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 text-xs" id="box-formulario-contrato">
         
         <div class="space-y-3">
@@ -386,37 +393,61 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">CLIENTE:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">CLIENTE:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-cliente')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-cliente" class="table-input border border-slate-300 bg-white font-bold text-slate-900">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">CNPJ:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">CNPJ:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-cnpj')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-cnpj" onblur="window.borealApp.consultarCNPJBrasilAPI(this.value)" placeholder="00.000.000/0001-00" class="table-input border border-slate-300 bg-white font-mono">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">CNAE (Busca auto):</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">CNAE:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-cnae')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-cnae" placeholder="Ex: 84.11-6-00" class="table-input border border-slate-300 bg-white">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">GRAU DE RISCO:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">GRAU DE RISCO:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-grau-risco')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-grau-risco" placeholder="Grau 1, 2, 3 ou 4" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">CEP (Busca auto via ViaCEP):</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">CEP (ViaCEP):</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-cep')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-cep" onblur="window.borealApp.consultarCEPViaCEP(this.value)" placeholder="00000-000" class="table-input border border-slate-300 bg-white font-mono">
             </div>
             <div class="md:col-span-2">
-              <label class="block font-semibold text-slate-700 mb-1">ENDEREÇO:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">ENDEREÇO:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-endereco')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-endereco" class="table-input border border-slate-300 bg-white">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nº DO CONTRATO:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">Nº DO CONTRATO:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-numero')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-numero" class="table-input border border-slate-300 bg-white font-semibold">
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">DATA DO CONTRATO (BR dd/mm/aaaa):</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">DATA (dd/mm/aaaa):</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-data')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-data" placeholder="dd/mm/aaaa" class="table-input border border-slate-300 bg-white font-semibold">
             </div>
             <div>
@@ -438,13 +469,19 @@
               </select>
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">HORÁRIO DE EXPEDIENTE:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">HORÁRIO EXPEDIENTE:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-horario')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-horario" placeholder="Ex: 08:00 às 17:00" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div class="md:col-span-3">
               <div class="flex items-center justify-between mb-1">
-                <label class="font-semibold text-slate-700">OBJETO DO CONTRATO:</label>
+                <div class="flex items-center space-x-2">
+                  <label class="font-semibold text-slate-700">OBJETO DO CONTRATO:</label>
+                  <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-objeto')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+                </div>
                 <button onclick="window.borealApp.abrirRelatorioProducaoDoContrato()" class="text-[#B48D3C] hover:underline font-bold text-[11px] flex items-center space-x-1">
                   <span>(Ao clicar aqui abre-se o Relatório de Produção)</span>
                   <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
@@ -472,21 +509,30 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-              <span class="font-bold text-slate-800 block">Fiscal do Contrato:</span>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-800 block">Fiscal do Contrato:</span>
+                <button type="button" onclick="['ct-fiscal-nome','ct-fiscal-tel','ct-fiscal-email'].forEach(id=>window.borealApp.limparCampoIndividual(id))" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-fiscal-nome" placeholder="NOME DO FISCAL" class="table-input border border-slate-300 bg-white">
               <input type="text" id="ct-fiscal-tel" placeholder="TELEFONE" class="table-input border border-slate-300 bg-white">
               <input type="email" id="ct-fiscal-email" placeholder="EMAIL DO FISCAL" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-              <span class="font-bold text-slate-800 block">Contato de Pagamento:</span>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-800 block">Contato de Pagamento:</span>
+                <button type="button" onclick="['ct-pagto-nome','ct-pagto-tel','ct-pagto-email'].forEach(id=>window.borealApp.limparCampoIndividual(id))" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-pagto-nome" placeholder="CONTATO DE PAGTO" class="table-input border border-slate-300 bg-white">
               <input type="text" id="ct-pagto-tel" placeholder="TEL DE PAGTO" class="table-input border border-slate-300 bg-white">
               <input type="email" id="ct-pagto-email" placeholder="EMAIL DE PAGTO" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-              <span class="font-bold text-slate-800 block">Alíquotas de Retenção (%):</span>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-800 block">Alíquotas de Retenção (%):</span>
+                <button type="button" onclick="['ct-aliq-iss','ct-aliq-cofins','ct-aliq-csll','ct-aliq-irpj','ct-aliq-pis','ct-aliq-cbs','ct-aliq-ibs'].forEach(id=>window.borealApp.limparCampoIndividual(id))" class="text-[10px] text-slate-400 hover:text-rose-600">Zerar</button>
+              </div>
               <div class="grid grid-cols-4 gap-1.5 text-[10px]">
                 <div><span class="block font-bold">ISS:</span><input type="number" step="0.1" id="ct-aliq-iss" value="5.0" class="table-input border bg-white p-1 text-center"></div>
                 <div><span class="block font-bold">COFINS:</span><input type="number" step="0.1" id="ct-aliq-cofins" value="3.0" class="table-input border bg-white p-1 text-center"></div>
@@ -507,32 +553,53 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">TIPO DE GARANTIA:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">TIPO DE GARANTIA:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-garantia-tipo')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-garantia-tipo" placeholder="Seguro Garantia / Fiança Bancária" class="table-input border border-slate-300 bg-white">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">PERCENTUAL (%):</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">PERCENTUAL (%):</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-garantia-perc')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-garantia-perc" placeholder="Ex: 5%" class="table-input border border-slate-300 bg-white">
             </div>
             <div class="sigilo-valor">
-              <label class="block font-semibold text-slate-700 mb-1">VALOR DA APÓLICE (R$):</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">VALOR APÓLICE (R$):</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-garantia-apolice')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="number" step="0.01" id="ct-garantia-apolice" placeholder="0,00" class="table-input border border-slate-300 bg-white font-bold text-emerald-700">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">NOME DA CORRETORA:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">NOME CORRETORA:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-garantia-corretora')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-garantia-corretora" placeholder="Corretora de Seguros" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">NOME DO CONTATO:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">NOME DO CONTATO:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-garantia-contato')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-garantia-contato" class="table-input border border-slate-300 bg-white">
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">TELEFONE:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">TELEFONE:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-garantia-tel')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="ct-garantia-tel" class="table-input border border-slate-300 bg-white">
             </div>
             <div class="md:col-span-2">
-              <label class="block font-semibold text-slate-700 mb-1">EMAIL DA CORRETORA:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-700">EMAIL DA CORRETORA:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('ct-garantia-email')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="email" id="ct-garantia-email" class="table-input border border-slate-300 bg-white">
             </div>
           </div>
@@ -543,7 +610,7 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- MÓDULO 3: RELATÓRIO DE PRODUÇÃO (SEPARADO)                                -->
+    <!-- MÓDULO 3: RELATÓRIO DE PRODUÇÃO                                           -->
     <!-- ========================================================================= -->
     <section id="sec-relatorio-producao" class="hidden space-y-6">
 
@@ -560,7 +627,7 @@
         <div class="flex items-center space-x-2">
           <label class="text-xs font-bold text-slate-700 uppercase">Cliente em Produção:</label>
           <select id="select-cliente-producao" onchange="window.borealApp.carregarProducaoCliente(this.value)" class="text-xs font-bold border border-slate-300 rounded-lg p-2 bg-amber-50/70 text-slate-900 max-w-xs md:max-w-md truncate focus:ring-[#B48D3C]">
-            <!-- Populado com clientes que possuem produção -->
+            <option value="">Nenhum cliente em produção</option>
           </select>
         </div>
       </div>
@@ -603,7 +670,7 @@
               </tr>
             </thead>
             <tbody id="tbody-relatorio-producao-modulo3" class="divide-y divide-slate-100 bg-white">
-              <!-- Linhas de produção daquele cliente -->
+              <!-- Linhas populadas dinamicamente -->
             </tbody>
             <tfoot class="bg-slate-50 font-bold border-t border-slate-200 sigilo-valor">
               <tr>
@@ -619,7 +686,7 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- MÓDULO 4: DOCUMENTOS PADRÕES                                              -->
+    <!-- MÓDULO 4: DOCUMENTOS PADRÕES (COM MENSAGEM FISCAL CÓDIGO 17.09)           -->
     <!-- ========================================================================= -->
     <section id="sec-documentos-padroes" class="hidden space-y-6 sigilo-valor">
 
@@ -629,7 +696,7 @@
             Emissão Oficial de Documentos Padrões Boreal
           </h1>
           <p class="text-xs text-slate-500">
-            Layout fiel em fonte Cambria 10 com geração de código de integridade SHA-256 no rodapé.
+            Layout fiel em fonte Cambria 10 com geração de código de integridade SHA-256 e instruções de retenções fiscais.
           </p>
         </div>
 
@@ -666,28 +733,43 @@
 
           <div class="space-y-2.5">
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Destinatário (À):</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-600">Destinatário (À):</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('doc-in-destinatario')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="doc-in-destinatario" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block font-semibold text-slate-600 mb-1">Aos Cuidados (A/C):</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="font-semibold text-slate-600">Aos Cuidados (A/C):</label>
+                  <button type="button" onclick="window.borealApp.limparCampoIndividual('doc-in-ac')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+                </div>
                 <input type="text" id="doc-in-ac" class="table-input border border-slate-300 bg-white">
               </div>
               <div>
-                <label class="block font-semibold text-slate-600 mb-1">Assunto:</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="font-semibold text-slate-600">Assunto:</label>
+                  <button type="button" onclick="window.borealApp.limparCampoIndividual('doc-in-assunto')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+                </div>
                 <input type="text" id="doc-in-assunto" class="table-input border border-slate-300 bg-white">
               </div>
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Referência (Ref.):</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-600">Referência (Ref.):</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('doc-in-ref')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <input type="text" id="doc-in-ref" class="table-input border border-slate-300 bg-white">
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Texto Introdutório / Proposta para:</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-semibold text-slate-600">Texto Introdutório / Proposta para:</label>
+                <button type="button" onclick="window.borealApp.limparCampoIndividual('doc-in-objeto')" class="text-[10px] text-slate-400 hover:text-rose-600">Limpar</button>
+              </div>
               <textarea id="doc-in-objeto" rows="3" class="table-input border border-slate-300 bg-white"></textarea>
             </div>
           </div>
@@ -721,22 +803,30 @@
             </div>
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Data da Emissão (dd/mm/aaaa):</label>
-              <input type="text" id="doc-in-data" value="10/11/2026" class="table-input border border-slate-300 bg-white">
+              <input type="text" id="doc-in-data" value="11/11/2026" class="table-input border border-slate-300 bg-white">
             </div>
           </div>
 
-          <div class="flex items-center space-x-2 pt-2">
-            <button onclick="window.borealApp.baixarDocWord()" class="flex-1 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition">
-              <i data-lucide="file-text" class="w-4 h-4"></i>
-              <span>Baixar em Word (.docx)</span>
-            </button>
-            <button onclick="window.borealApp.salvarPropostaNoComercial()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition" title="Salva e anexa na coluna de Proposta do Relatório Comercial">
-              <i data-lucide="check-circle" class="w-4 h-4"></i>
-              <span>Salvar & Anexar no Comercial</span>
+          <!-- BOTÕES DE DOWNLOAD E DISPARO POR E-MAIL AO FISCAL / PAGAMENTO (PONTOS 4, 5, 6) -->
+          <div class="flex flex-col space-y-2 pt-2">
+            <div class="flex items-center space-x-2">
+              <button onclick="window.borealApp.baixarDocWord()" class="flex-1 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                <span>Baixar em Word (.docx)</span>
+              </button>
+              <button onclick="window.borealApp.salvarPropostaNoComercial()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition" title="Salva e anexa na coluna de Proposta do Relatório Comercial">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Salvar & Anexar</span>
+              </button>
+            </div>
+            <button onclick="window.borealApp.enviarNotificacaoEmailFiscalEPagto()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-amber-300 rounded-lg font-semibold flex items-center justify-center space-x-1.5 shadow-sm transition" title="Dispara e-mail para o fiscal e contato de pagamento com instruções fiscais e link do sistema">
+              <i data-lucide="mail" class="w-4 h-4"></i>
+              <span>Enviar E-mail ao Fiscal & Pagamento (com Retenções Cód. 17.09)</span>
             </button>
           </div>
         </div>
 
+        <!-- PREVIEW EM CAMBRIA 10 COM AVISO DE RETENÇÕES TRIBUTÁRIAS 17.09 (PONTOS 4 E 5) -->
         <div class="lg:col-span-7 bg-white p-8 sm:p-10 rounded-xl border border-slate-300 shadow-sm doc-cambria space-y-4" id="box-preview-documento-oficial">
           
           <div class="border-b-2 border-[#B48D3C] pb-3 flex items-center justify-between">
@@ -769,6 +859,12 @@
 
           <div id="pv-doc-tabela-box" class="pt-2"></div>
 
+          <!-- MENSAGEM OBRIGATÓRIA DE RETENÇÕES TRIBUTÁRIAS CÓDIGO 17.09 (PONTOS 4 E 5) -->
+          <div id="pv-doc-aviso-retencoes-1709" class="p-3 bg-slate-50 border border-slate-200 rounded text-[9pt] text-slate-700 leading-relaxed text-justify hidden">
+            <strong>COMUNICADO FISCAL / TRIBUTÁRIO (CÓDIGO 17.09):</strong><br>
+            Solicitamos a gentileza de informar, através do setor de pagamentos ou contabilidade, para os e-mails <strong>financeiro@boreal.eng.br</strong> ou <strong>contato@boreal.eng.br</strong>, quais as alíquotas de retenções tributárias adotadas por este órgão/empresa para o registro na Nota Fiscal de serviços referente ao <strong>código tributário 17.09</strong> (cujo ISS é recolhido pelo município da sede do prestador - Paulínia/SP), caso essa informação ainda não tenha sido previamente transmitida.
+          </div>
+
           <div id="pv-doc-bloco-declaracoes" class="space-y-2 text-slate-800 pt-2 text-[9.5pt]">
             <div><strong>Valor Global da Proposta:</strong> <span id="pv-doc-valor-extenso" class="font-bold text-slate-900">R$ 0,00 (Zero reais)</span></div>
             <div class="text-justify leading-snug">
@@ -780,7 +876,7 @@
           </div>
 
           <div class="pt-6 border-t border-slate-200 flex flex-col items-start space-y-1">
-            <div id="pv-doc-data" class="text-slate-600 pb-2">Paulínia/SP, 10 de Novembro de 2026</div>
+            <div id="pv-doc-data" class="text-slate-600 pb-2">Paulínia/SP, 11 de Novembro de 2026</div>
             <div class="text-slate-800 font-semibold">Atenciosamente,</div>
             <div class="font-bold text-slate-900 leading-tight">Luiz Fernando Gomes de Jesus</div>
             <div class="text-slate-700">Sócio Gerente / Responsável Técnico</div>
@@ -789,7 +885,6 @@
               Av. José Puccinelli, 130 - João Aranha - Paulínia - SP CEP 13.146.000 Tel 19 99156 7153 - contato@boreal.eng.br
             </div>
 
-            <!-- RODAPÉ SHA-256 -->
             <div class="mt-4 pt-2 border-t border-dashed border-slate-300 w-full text-[8pt] text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1 bg-slate-50 p-2 rounded">
               <div>
                 <strong>Autenticidade e Integridade Digital:</strong>
@@ -825,7 +920,7 @@
         <div class="flex items-center space-x-2">
           <label class="text-xs font-bold text-slate-700">Cliente Logado:</label>
           <select id="select-portal-cliente-logado" onchange="window.borealApp.renderizarPortalCliente(this.value)" class="text-xs font-semibold border border-slate-300 rounded p-1.5 bg-slate-50">
-            <!-- Populado via script -->
+            <option value="">Nenhum cliente conectado</option>
           </select>
         </div>
       </div>
@@ -885,7 +980,7 @@
     </div>
   </div>
 
-  <!-- MODAL: RELATÓRIO CONSOLIDADO DE TODOS OS CLIENTES (PONTO 12) -->
+  <!-- MODAL: RELATÓRIO CONSOLIDADO DE TODOS OS CLIENTES -->
   <div id="modal-consolidado" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden">
       <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
