@@ -76,7 +76,6 @@
       user-select: none;
       pointer-events: none;
     }
-    /* Ocultamento estrito de controles administrativos no perfil Cliente */
     body.perfil-cliente .admin-only {
       display: none !important;
     }
@@ -148,7 +147,6 @@
         </span>
       </div>
 
-      <!-- BUSCA DE CLIENTES E AÇÕES GLOBAIS (VEDADAS AO CLIENTE EXTERNO) -->
       <div class="flex items-center space-x-3">
         <div class="flex items-center space-x-1.5 bg-amber-50/70 border border-amber-300 rounded-lg p-1.5 admin-only">
           <i data-lucide="users" class="w-4 h-4 text-[#B48D3C]"></i>
@@ -172,32 +170,28 @@
 
     </div>
 
-    <!-- ABAS DOS MÓDULOS (ORDEM ATUALIZADA: DOCUMENTOS PADRÕES COMO MÓDULO 2) -->
+    <!-- ABAS DOS MÓDULOS -->
     <nav class="max-w-[1750px] mx-auto px-4 sm:px-6 flex space-x-2 overflow-x-auto border-t border-slate-100 py-1">
       <button onclick="window.borealApp.abrirModulo('relatorio_comercial')" class="tab-nav active px-5 py-3 border-b-2 border-transparent text-slate-700 hover:text-[#B48D3C] flex items-center space-x-2 whitespace-nowrap rounded-t-md admin-only" id="tab-nav-relatorio">
         <i data-lucide="layout-grid" class="w-4 h-4 text-[#B48D3C]"></i>
         <span>1. RELATÓRIO COMERCIAL</span>
       </button>
 
-      <!-- 2º MÓDULO: DOCUMENTOS PADRÕES REPOSICIONADO -->
       <button onclick="window.borealApp.abrirModulo('documentos_padroes')" class="tab-nav px-5 py-3 border-b-2 border-transparent text-slate-700 hover:text-[#B48D3C] flex items-center space-x-2 whitespace-nowrap rounded-t-md sigilo-valor admin-only" id="tab-nav-documentos">
         <i data-lucide="file-text" class="w-4 h-4 text-[#B48D3C]"></i>
         <span>2. DOCUMENTOS PADRÕES</span>
       </button>
 
-      <!-- 3º MÓDULO: CONTRATOS -->
       <button onclick="window.borealApp.abrirModulo('modulo_contratos')" class="tab-nav px-5 py-3 border-b-2 border-transparent text-slate-700 hover:text-[#B48D3C] flex items-center space-x-2 whitespace-nowrap rounded-t-md admin-only" id="tab-nav-contratos">
         <i data-lucide="file-check" class="w-4 h-4 text-[#B48D3C]"></i>
         <span>3. CONTRATOS</span>
       </button>
 
-      <!-- 4º MÓDULO: RELATÓRIO DE PRODUÇÃO -->
       <button onclick="window.borealApp.abrirModulo('relatorio_producao')" class="tab-nav px-5 py-3 border-b-2 border-transparent text-slate-700 hover:text-[#B48D3C] flex items-center space-x-2 whitespace-nowrap rounded-t-md admin-only" id="tab-nav-producao">
         <i data-lucide="hard-hat" class="w-4 h-4 text-[#B48D3C]"></i>
         <span>4. RELATÓRIO DE PRODUÇÃO</span>
       </button>
 
-      <!-- 5º MÓDULO: ACESSO EXTERNO DO CLIENTE -->
       <button onclick="window.borealApp.abrirModulo('portal_cliente')" class="tab-nav px-5 py-3 border-b-2 border-transparent text-slate-700 hover:text-[#B48D3C] flex items-center space-x-2 whitespace-nowrap rounded-t-md" id="tab-nav-portal">
         <i data-lucide="external-link" class="w-4 h-4 text-[#B48D3C]"></i>
         <span>5. ACESSO EXTERNO DO CLIENTE</span>
@@ -208,13 +202,9 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="flex-1 max-w-[1750px] w-full mx-auto p-4 sm:p-6 space-y-6">
 
-    <!-- ========================================================================= -->
-    <!-- MÓDULO 1: RELATÓRIO COMERCIAL                                             -->
-    <!-- ========================================================================= -->
+    <!-- MÓDULO 1: RELATÓRIO COMERCIAL -->
     <section id="sec-relatorio-comercial" class="space-y-6">
-
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- RADAR -->
         <div class="lg:col-span-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <div class="flex items-center space-x-2">
@@ -240,7 +230,6 @@
           </div>
         </div>
 
-        <!-- UPLOAD COM LEITOR REAL DE ALTA PRECISÃO -->
         <div class="lg:col-span-6 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <div class="flex items-center space-x-2">
@@ -266,7 +255,6 @@
         </div>
       </div>
 
-      <!-- MATRIZ COMERCIAL -->
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
           <div>
@@ -279,7 +267,6 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <!-- ÁUDIO DO COMERCIAL -->
             <button id="btn-mic-comercial" onclick="window.borealApp.alternarAudioModulo('comercial')" class="px-3 py-1.5 bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition">
               <i data-lucide="mic" class="w-4 h-4 text-[#B48D3C]" id="icon-mic-comercial"></i>
               <span id="lbl-mic-comercial">Gravar por Voz</span>
@@ -290,7 +277,6 @@
               <span>Novo Processo</span>
             </button>
 
-            <!-- EXCEL DESTRAVADO -->
             <button onclick="window.borealApp.exportarRelatorioExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
               <span>Exportar Excel</span>
@@ -320,14 +306,10 @@
           </table>
         </div>
       </div>
-
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- MÓDULO 2: DOCUMENTOS PADRÕES                                              -->
-    <!-- ========================================================================= -->
+    <!-- MÓDULO 2: DOCUMENTOS PADRÕES -->
     <section id="sec-documentos-padroes" class="hidden space-y-6 sigilo-valor">
-
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
@@ -361,8 +343,6 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        <!-- PARÂMETROS EDITÁVEIS -->
         <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 text-xs">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <h3 class="font-bold text-slate-800 uppercase">Parâmetros de Edição do Documento</h3>
@@ -442,9 +422,8 @@
           </div>
         </div>
 
-        <!-- PRÉ-VISUALIZAÇÃO DA FOLHA TIMBRADA -->
+        <!-- PRÉVIA DOCUMENTO -->
         <div class="lg:col-span-7 bg-white p-8 sm:p-10 rounded-xl border border-slate-300 shadow-sm doc-cambria space-y-4" id="box-preview-documento-oficial">
-          
           <div class="border-b-2 border-[#B48D3C] pb-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
               <div class="w-12 h-12 rounded bg-[#4A4A4A] flex items-center justify-center font-bold text-xl text-[#B48D3C] border border-[#B48D3C]">
@@ -475,7 +454,6 @@
 
           <div id="pv-doc-tabela-box" class="pt-2"></div>
 
-          <!-- BLOCO DE ALÍQUOTAS (SOMENTE NO RELATÓRIO DE SERVIÇOS ENTREGUES) -->
           <div id="pv-doc-bloco-aliquotas" class="hidden p-3 bg-slate-50 border border-slate-200 rounded text-[9pt] text-slate-700 leading-relaxed">
             <strong>INSTRUÇÕES FISCAIS / TRIBUTÁRIAS (CÓDIGO TRIBUTÁRIO 17.09):</strong><br>
             Solicitamos a gentileza de informar, através do setor de pagamentos ou contabilidade, para os e-mails <em>financeiro@boreal.eng.br</em> ou <em>contato@boreal.eng.br</em>, quais as alíquotas de retenções tributárias adotadas por este órgão/empresa para emissão da Nota Fiscal referente ao código 17.09 (cujo ISS é recolhido pelo município da sede do prestador - Paulínia/SP).
@@ -501,7 +479,6 @@
               Av. José Puccinelli, 130 - João Aranha - Paulínia - SP CEP 13.146.000 Tel 19 99156 7153 - contato@boreal.eng.br
             </div>
 
-            <!-- RODAPÉ SHA-256 -->
             <div class="mt-4 pt-2 border-t border-dashed border-slate-300 w-full text-[8pt] text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1 bg-slate-50 p-2 rounded">
               <div>
                 <strong>Autenticidade e Integridade Digital:</strong>
@@ -512,18 +489,12 @@
               </div>
             </div>
           </div>
-
         </div>
-
       </div>
-
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- MÓDULO 3: CONTRATOS                                                       -->
-    <!-- ========================================================================= -->
+    <!-- MÓDULO 3: CONTRATOS -->
     <section id="sec-modulo-contratos" class="hidden space-y-6">
-
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
@@ -551,7 +522,6 @@
         </div>
       </div>
 
-      <!-- PAINEL DE ENTRADA DO CONTRATO: ANEXAÇÃO + MICROFONE -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div class="lg:col-span-8 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -565,7 +535,6 @@
               <input type="file" accept=".pdf, .docx, .doc" class="hidden" onchange="window.borealApp.lerArquivoContrato(this)">
             </label>
 
-            <!-- ÁUDIO DO CONTRATO CORRIGIDO -->
             <button id="btn-mic-contrato" onclick="window.borealApp.alternarAudioModulo('contratos')" class="px-3 py-2 bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition">
               <i data-lucide="mic" class="w-4 h-4 text-[#B48D3C]" id="icon-mic-contrato"></i>
               <span id="lbl-mic-contrato">Preencher por Áudio (Voz)</span>
@@ -586,7 +555,6 @@
               <i data-lucide="save" class="w-3.5 h-3.5"></i>
               <span>Salvar Contrato</span>
             </button>
-            <!-- LIXEIRA CORRIGIDA E DESTRAVADA -->
             <button onclick="window.borealApp.apagarContratoAtivo()" class="px-2.5 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg text-xs font-semibold transition" title="Apagar Registro do Contrato">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
@@ -594,7 +562,6 @@
         </div>
       </div>
 
-      <!-- FORMULÁRIO DO CONTRATO -->
       <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 text-xs" id="box-formulario-contrato">
         <div class="space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -664,7 +631,6 @@
             <div class="md:col-span-3">
               <div class="flex items-center justify-between mb-1">
                 <label class="font-semibold text-slate-700">OBJETO DO CONTRATO:</label>
-                <!-- LINK CORRIGIDO PARA O RELATÓRIO DE PRODUÇÃO -->
                 <button type="button" onclick="window.borealApp.abrirRelatorioProducaoDoContrato()" class="text-[#B48D3C] hover:underline font-bold text-[11px] flex items-center space-x-1 cursor-pointer">
                   <span>(Ao clicar aqui abre-se o Relatório de Produção)</span>
                   <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
@@ -758,14 +724,10 @@
           </div>
         </div>
       </div>
-
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- MÓDULO 4: RELATÓRIO DE PRODUÇÃO                                           -->
-    <!-- ========================================================================= -->
+    <!-- MÓDULO 4: RELATÓRIO DE PRODUÇÃO -->
     <section id="sec-relatorio-producao" class="hidden space-y-6">
-
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
@@ -793,19 +755,16 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <!-- NOVO MICROFONE DO RELATÓRIO DE PRODUÇÃO -->
             <button id="btn-mic-producao" onclick="window.borealApp.alternarAudioModulo('producao')" class="px-3 py-1.5 bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition">
               <i data-lucide="mic" class="w-4 h-4 text-[#B48D3C]" id="icon-mic-producao"></i>
               <span id="lbl-mic-producao">Gravar por Voz</span>
             </button>
 
-            <!-- ADICIONAR ITEM DESTRAVADO -->
             <button onclick="window.borealApp.adicionarItemProducaoManual()" class="px-3 py-1.5 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>Adicionar Item</span>
             </button>
             
-            <!-- FAZER PROPOSTA DESTRAVADO -->
             <button onclick="window.borealApp.fazerPropostaAutomaticaModulo3()" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-sm transition sigilo-valor">
               <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
               <span>Fazer Proposta</span>
@@ -841,14 +800,10 @@
           </table>
         </div>
       </div>
-
     </section>
 
-    <!-- ========================================================================= -->
-    <!-- MÓDULO 5: ACESSO EXTERNO DO CLIENTE (PORTAL EXCLUSIVO)                   -->
-    <!-- ========================================================================= -->
+    <!-- MÓDULO 5: ACESSO EXTERNO DO CLIENTE -->
     <section id="sec-portal-cliente" class="space-y-6">
-
       <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">
@@ -884,21 +839,26 @@
           </table>
         </div>
       </div>
-
     </section>
 
   </main>
 
-  <!-- MODAL: LOGIN / SENHA OBRIGATÓRIA -->
+  <!-- MODAL DE SENHA COM BOTÃO DE CANCELAMENTO / RECUPERAÇÃO DE INTERFACE -->
   <div id="modal-login-senha" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-amber-300">
-      <div class="flex items-center space-x-3 pb-3 border-b">
-        <div class="w-8 h-8 rounded bg-[#4A4A4A] flex items-center justify-center font-bold text-sm text-[#B48D3C] border border-[#B48D3C]">B</div>
-        <div>
-          <h3 class="text-sm font-bold text-slate-900 uppercase">Autenticação do Sistema Boreal</h3>
-          <p class="text-[11px] text-slate-500">Entre com seu e-mail cadastrado e senha do Supabase.</p>
+      <div class="flex items-center justify-between pb-3 border-b">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded bg-[#4A4A4A] flex items-center justify-center font-bold text-sm text-[#B48D3C] border border-[#B48D3C]">B</div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 uppercase">Autenticação do Sistema Boreal</h3>
+            <p class="text-[11px] text-slate-500">Entre com seu e-mail cadastrado e senha do Supabase.</p>
+          </div>
         </div>
+        <button type="button" onclick="window.borealApp.fecharModalLogin()" class="text-slate-400 hover:text-slate-600 p-1" title="Fechar / Usar Sistema">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
       </div>
+
       <div class="space-y-3 text-xs">
         <div>
           <label class="block font-semibold text-slate-700 mb-1">E-mail Cadastrado:</label>
@@ -913,15 +873,19 @@
           <label for="login-check-lembrar" class="text-slate-600 font-medium">Lembrar credenciais neste dispositivo</label>
         </div>
       </div>
-      <div class="flex items-center justify-end space-x-2 pt-2">
-        <button onclick="window.borealApp.salvarCredenciaisSenha()" class="w-full py-2 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded text-xs font-bold transition shadow-sm">
+
+      <div class="flex items-center space-x-2 pt-2">
+        <button type="button" onclick="window.borealApp.fecharModalLogin()" class="w-1/3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold transition">
+          Cancelar
+        </button>
+        <button id="btn-submit-login" type="button" onclick="window.borealApp.salvarCredenciaisSenha()" class="w-2/3 py-2 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded text-xs font-bold transition shadow-sm">
           Acessar Sistema
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: RELATÓRIO CONSOLIDADO -->
+  <!-- MODAL CONSOLIDADO -->
   <div id="modal-consolidado" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden">
       <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
@@ -944,7 +908,6 @@
     </div>
   </div>
 
-  <!-- SCRIPT CENTRAL -->
   <script src="script.js"></script>
 </body>
 </html>
