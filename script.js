@@ -1,6 +1,6 @@
 /**
  * BOREAL ENGMED - SISTEMA INTEGRADO COMERCIAL, CONTRATOS, PRODUÇÃO & DOCUMENTOS
- * Versão 8.6 - Conexão Segura Anti-Travamento e Resolução Imediata de Acesso
+ * Versão 8.7 - Controle de Acesso por Usuário/E-mail e Persistência de Sessão
  */
 
 const SUPABASE_URL = "https://mtcvqkxawanntplbykes.supabase.co";
@@ -21,6 +21,8 @@ window.borealApp = {
   modeloDocAtivo: "proposta",
   linkRadarEditais: "https://app.licitei.com.br/dashboard/radar-de-licitacoes?filterId=%229417%22&date=20260529%3B20260529&periodType=publication&page=0&orderBy=relevant&showSeen=false&edit=false&triagem=false",
   perfilAtivo: "gestor", // 'gestor', 'agente', 'cliente'
+  usuarioLogadoEmail: null,
+  autenticado: false,
   arquivosEmMemoria: {},
   instanciaReconhecimentoVoz: null,
   moduloAudioGravando: null,
@@ -133,19 +135,24 @@ window.borealApp = {
     try {
       this.carregarDadosLocais();
       this.verificarAutenticacaoInicial();
-      this.carregarLinkRadar();
-      this.renderizarRelatorioComercial();
-      this.atualizarSeletorClientesGlobal();
-      this.popularSeletoresContratos();
-      this.carregarContratanteNoModulo(this.clienteAtivoId);
-      this.popularSeletoresProducao();
-      this.carregarProducaoCliente(this.clienteAtivoId);
-      this.popularSeletoresDocumentos();
-      this.renderizarDocumentoAtivo();
-      this.renderizarPortalCliente();
     } catch (err) {
       console.error("Erro na inicialização:", err);
+      this.abrirModalLogin(false);
     }
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  inicializarModulosSistema: function() {
+    this.carregarLinkRadar();
+    this.renderizarRelatorioComercial();
+    this.atualizarSeletorClientesGlobal();
+    this.popularSeletoresContratos();
+    this.carregarContratanteNoModulo(this.clienteAtivoId);
+    this.popularSeletoresProducao();
+    this.carregarProducaoCliente(this.clienteAtivoId);
+    this.popularSeletoresDocumentos();
+    this.renderizarDocumentoAtivo();
+    this.renderizarPortalCliente();
     if (window.lucide) window.lucide.createIcons();
   },
 
@@ -168,25 +175,120 @@ window.borealApp = {
     }
   },
 
-  verificarAutenticacaoInicial: function() {
-    const cred = localStorage.getItem("boreal_auth_cred");
-    if (!cred) {
-      this.abrirModalLogin();
+  // GERENCIAMENTO DE USUÁRIOS POR E-MAIL E SESSÃO PERSISTENTE
+  obterUsuariosCadastrados: function() {
+    try {
+      const raw = localStorage.getItem("boreal_usuarios_cadastrados");
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  },
+
+  salvarUsuarioCadastrado: function(email, senha, perfil) {
+    const usuarios = this.obterUsuariosCadastrados();
+    usuarios[email.toLowerCase()] = {
+      email: email.toLowerCase(),
+      senha: senha,
+      perfil: perfil,
+      atualizadoEm: new Date().toISOString()
+    };
+    localStorage.setItem("boreal_usuarios_cadastrados", JSON.stringify(usuarios));
+  },
+
+  verificarEmailDigitadoLogin: function() {
+    const inputEmail = document.getElementById("login-input-email");
+    const inputSenha = document.getElementById("login-input-senha");
+    const selectPerfil = document.getElementById("login-select-perfil");
+    const boxPerfil = document.getElementById("box-login-perfil-registro");
+    const badge = document.getElementById("login-badge-status-email");
+    const btnSubmit = document.getElementById("btn-submit-login");
+
+    if (!inputEmail) return;
+    const email = inputEmail.value.trim().toLowerCase();
+    const usuarios = this.obterUsuariosCadastrados();
+
+    if (email && usuarios[email]) {
+      const u = usuarios[email];
+      if (badge) badge.textContent = `✓ Perfil encontrado (${u.perfil.toUpperCase()}) - Senha salva vinculada.`;
+      if (selectPerfil) selectPerfil.value = u.perfil;
+      if (boxPerfil) boxPerfil.classList.add("hidden");
+      if (inputSenha && !inputSenha.value) {
+        inputSenha.value = u.senha;
+      }
+      if (btnSubmit) btnSubmit.textContent = "Acessar Sistema";
+    } else if (email.includes("@")) {
+      if (badge) badge.textContent = "★ Novo e-mail: defina sua senha e perfil para o 1º registro.";
+      if (boxPerfil) boxPerfil.classList.remove("hidden");
+      if (selectPerfil) {
+        if (email.includes("cliente")) selectPerfil.value = "cliente";
+        else if (email.includes("agente")) selectPerfil.value = "agente";
+        else selectPerfil.value = "gestor";
+      }
+      if (btnSubmit) btnSubmit.textContent = "Registrar e Acessar Sistema";
     } else {
+      if (badge) badge.textContent = "";
+      if (boxPerfil) boxPerfil.classList.remove("hidden");
+    }
+  },
+
+  verificarAutenticacaoInicial: function() {
+    // Migração de credencial antiga se existir
+    const credAntiga = localStorage.getItem("boreal_auth_cred");
+    if (credAntiga) {
       try {
-        const c = JSON.parse(cred);
-        if (c.email && c.email.toLowerCase().includes("cliente")) {
-          this.perfilAtivo = "cliente";
-        } else if (c.email && c.email.toLowerCase().includes("agente")) {
-          this.perfilAtivo = "agente";
-        } else {
-          this.perfilAtivo = "gestor";
+        const c = JSON.parse(credAntiga);
+        if (c.email && c.senha) {
+          const p = c.email.toLowerCase().includes("cliente") ? "cliente" : (c.email.toLowerCase().includes("agente") ? "agente" : "gestor");
+          this.salvarUsuarioCadastrado(c.email, c.senha, p);
+          localStorage.setItem("boreal_sessao_ativa", JSON.stringify({ email: c.email.toLowerCase(), perfil: p }));
         }
+        localStorage.removeItem("boreal_auth_cred");
+      } catch (e) {}
+    }
+
+    const sessaoRaw = localStorage.getItem("boreal_sessao_ativa");
+    if (!sessaoRaw) {
+      this.autenticado = false;
+      this.bloquearInterface(true);
+      this.abrirModalLogin(false);
+      return;
+    }
+
+    try {
+      const sessao = JSON.parse(sessaoRaw);
+      const usuarios = this.obterUsuariosCadastrados();
+      const usuarioValido = sessao.email ? usuarios[sessao.email.toLowerCase()] : null;
+
+      if (usuarioValido) {
+        this.usuarioLogadoEmail = usuarioValido.email;
+        this.perfilAtivo = usuarioValido.perfil || sessao.perfil || "gestor";
+        this.autenticado = true;
+        this.bloquearInterface(false);
         this.aplicarPerfilNoDOM();
         this.fecharModalLogin();
-      } catch (e) {
-        this.abrirModalLogin();
+        this.inicializarModulosSistema();
+      } else {
+        localStorage.removeItem("boreal_sessao_ativa");
+        this.autenticado = false;
+        this.bloquearInterface(true);
+        this.abrirModalLogin(false);
       }
+    } catch (e) {
+      this.autenticado = false;
+      this.bloquearInterface(true);
+      this.abrirModalLogin(false);
+    }
+  },
+
+  bloquearInterface: function(bloquear) {
+    const main = document.getElementById("conteudo-principal-sistema");
+    if (bloquear) {
+      document.body.classList.add("sistema-bloqueado");
+      if (main) main.classList.add("hidden");
+    } else {
+      document.body.classList.remove("sistema-bloqueado");
+      if (main) main.classList.remove("hidden");
     }
   },
 
@@ -195,6 +297,8 @@ window.borealApp = {
     this.aplicarPerfilNoDOM();
     if (novoPerfil === "cliente") {
       this.abrirModulo("portal_cliente");
+    } else if (this.abaAtiva === "portal_cliente") {
+      this.abrirModulo("relatorio_comercial");
     }
   },
 
@@ -202,46 +306,99 @@ window.borealApp = {
     const sel = document.getElementById("select-perfil-sistema");
     if (sel) sel.value = this.perfilAtivo;
     const lbl = document.getElementById("lbl-usuario-conectado");
+    const emailExibicao = this.usuarioLogadoEmail || "gestor@boreal.eng.br";
 
     if (this.perfilAtivo === "agente") {
       document.body.classList.add("perfil-agente");
       document.body.classList.remove("perfil-cliente");
-      if (lbl) lbl.textContent = "agente.operacao@boreal.eng.br (Agente - Valores Ocultos)";
+      if (lbl) lbl.textContent = `${emailExibicao} (Agente - Valores Ocultos)`;
     } else if (this.perfilAtivo === "cliente") {
       document.body.classList.remove("perfil-agente");
       document.body.classList.add("perfil-cliente");
-      if (lbl) lbl.textContent = "fiscal.cliente@orgao.gov.br (Cliente / Fiscal)";
+      if (lbl) lbl.textContent = `${emailExibicao} (Cliente / Fiscal)`;
       this.abrirModulo("portal_cliente");
     } else {
       document.body.classList.remove("perfil-agente");
       document.body.classList.remove("perfil-cliente");
-      if (lbl) lbl.textContent = "gestor@boreal.eng.br (Gestor Geral)";
+      if (lbl) lbl.textContent = `${emailExibicao} (Gestor Geral)`;
     }
   },
 
-  abrirModalLogin: function() {
+  abrirModalLogin: function(modoTrocaSenha = false) {
     const modal = document.getElementById("modal-login-senha");
+    const btnFechar = document.getElementById("btn-fechar-modal-login");
+    const btnCancelar = document.getElementById("btn-cancelar-modal-login");
+    const btnSubmit = document.getElementById("btn-submit-login");
+    const titulo = document.getElementById("modal-login-titulo");
+    const subtitulo = document.getElementById("modal-login-subtitulo");
+    const inputEmail = document.getElementById("login-input-email");
+    const inputSenha = document.getElementById("login-input-senha");
+
+    if (modoTrocaSenha && this.autenticado) {
+      if (btnFechar) btnFechar.classList.remove("hidden");
+      if (btnCancelar) btnCancelar.classList.remove("hidden");
+      if (btnSubmit) btnSubmit.className = "w-2/3 py-2.5 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded text-xs font-bold transition shadow-sm";
+      if (titulo) titulo.textContent = "Alterar Senha / Perfil";
+      if (subtitulo) subtitulo.textContent = "Atualize a senha vinculada ao seu e-mail.";
+      if (inputEmail && this.usuarioLogadoEmail) inputEmail.value = this.usuarioLogadoEmail;
+      if (inputSenha) inputSenha.value = "";
+    } else {
+      if (btnFechar) btnFechar.classList.add("hidden");
+      if (btnCancelar) btnCancelar.classList.add("hidden");
+      if (btnSubmit) btnSubmit.className = "w-full py-2.5 bg-[#B48D3C] hover:bg-[#9c782f] text-white rounded text-xs font-bold transition shadow-sm";
+      if (titulo) titulo.textContent = "Acesso Restrito - Sistema Boreal";
+      if (subtitulo) subtitulo.textContent = "Faça seu 1º registro ou entre com seu e-mail e senha.";
+      if (inputEmail) inputEmail.value = "";
+      if (inputSenha) inputSenha.value = "";
+    }
+
+    this.verificarEmailDigitadoLogin();
     if (modal) modal.classList.remove("hidden");
+    if (window.lucide) window.lucide.createIcons();
   },
 
   fecharModalLogin: function() {
+    if (!this.autenticado) return;
     const modal = document.getElementById("modal-login-senha");
     if (modal) modal.classList.add("hidden");
   },
 
-  // LOGIN CORRIGIDO: TIMEOUT DE 2.5 SEGUNDOS QUE NUNCA DEIXA A TELA CONGELAR
   salvarCredenciaisSenha: async function() {
     const btn = document.getElementById("btn-submit-login");
     const inputEmail = document.getElementById("login-input-email");
     const inputSenha = document.getElementById("login-input-senha");
+    const selectPerfil = document.getElementById("login-select-perfil");
     const lembrar = document.getElementById("login-check-lembrar") ? document.getElementById("login-check-lembrar").checked : true;
 
-    const email = inputEmail ? inputEmail.value.trim() : "";
+    const email = inputEmail ? inputEmail.value.trim().toLowerCase() : "";
     const senha = inputSenha ? inputSenha.value.trim() : "";
 
-    if (!email) {
-      alert("Por favor, preencha o e-mail cadastrado.");
+    if (!email || !email.includes("@")) {
+      alert("Por favor, informe um e-mail válido.");
+      if (inputEmail) inputEmail.focus();
       return;
+    }
+
+    if (!senha || senha.length < 4) {
+      alert("Por favor, informe uma senha de acesso (mínimo 4 caracteres).");
+      if (inputSenha) inputSenha.focus();
+      return;
+    }
+
+    const usuarios = this.obterUsuariosCadastrados();
+    const usuarioExistente = usuarios[email];
+    const modoTrocaSenha = this.autenticado && this.usuarioLogadoEmail === email;
+
+    // Se o usuário já existe e não está trocando a própria senha logado, exige que a senha bata
+    if (usuarioExistente && !modoTrocaSenha) {
+      if (usuarioExistente.senha !== senha) {
+        alert("Senha incorreta para o e-mail informado. Tente novamente.");
+        if (inputSenha) {
+          inputSenha.value = "";
+          inputSenha.focus();
+        }
+        return;
+      }
     }
 
     if (btn) {
@@ -250,11 +407,9 @@ window.borealApp = {
     }
 
     try {
-      if (supabaseClient && senha) {
-        // Tentativa de autenticação com limite de 2500ms
+      if (supabaseClient) {
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("tempo_limite")), 2500));
         const authPromise = supabaseClient.auth.signInWithPassword({ email, password: senha });
-
         try {
           await Promise.race([authPromise, timeoutPromise]);
         } catch (authErr) {
@@ -262,29 +417,30 @@ window.borealApp = {
         }
       }
 
+      const perfilFinal = usuarioExistente && !modoTrocaSenha
+        ? usuarioExistente.perfil
+        : (selectPerfil ? selectPerfil.value : "gestor");
+
+      // Salva/atualiza a senha vinculada ao e-mail específico
+      this.salvarUsuarioCadastrado(email, senha, perfilFinal);
+
       if (lembrar) {
-        localStorage.setItem("boreal_auth_cred", JSON.stringify({ email, senha }));
+        localStorage.setItem("boreal_sessao_ativa", JSON.stringify({ email, perfil: perfilFinal }));
       } else {
-        localStorage.removeItem("boreal_auth_cred");
+        localStorage.removeItem("boreal_sessao_ativa");
       }
 
-      if (email.toLowerCase().includes("cliente")) {
-        this.perfilAtivo = "cliente";
-      } else if (email.toLowerCase().includes("agente")) {
-        this.perfilAtivo = "agente";
-      } else {
-        this.perfilAtivo = "gestor";
-      }
+      this.usuarioLogadoEmail = email;
+      this.perfilAtivo = perfilFinal;
+      this.autenticado = true;
 
+      this.bloquearInterface(false);
       this.aplicarPerfilNoDOM();
       this.fecharModalLogin();
-      alert(`Autenticado com sucesso como ${email}!`);
+      this.inicializarModulosSistema();
     } catch (err) {
-      console.error("Erro inesperado no login:", err);
-      // Fallback seguro: libera o acesso administrativo local
-      this.perfilAtivo = "gestor";
-      this.aplicarPerfilNoDOM();
-      this.fecharModalLogin();
+      console.error("Erro no login:", err);
+      alert("Não foi possível concluir a autenticação. Tente novamente.");
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -294,11 +450,15 @@ window.borealApp = {
   },
 
   deslogarUsuario: function() {
-    if (confirm("Deseja deslogar da sessão atual?")) {
-      localStorage.removeItem("boreal_auth_cred");
+    if (confirm("Deseja sair da sessão atual?")) {
+      localStorage.removeItem("boreal_sessao_ativa");
+      this.autenticado = false;
+      this.usuarioLogadoEmail = null;
       this.perfilAtivo = "gestor";
-      this.aplicarPerfilNoDOM();
-      this.abrirModalLogin();
+      const lbl = document.getElementById("lbl-usuario-conectado");
+      if (lbl) lbl.textContent = "Aguardando autenticação...";
+      this.bloquearInterface(true);
+      this.abrirModalLogin(false);
     }
   },
 
